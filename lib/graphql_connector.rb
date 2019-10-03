@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 require 'graphql_connector/version'
+require 'graphql_connector/query_builder'
 require 'graphql_connector/configuration'
+require 'httparty'
 
 module GraphqlConnector
   class Error < StandardError; end
@@ -20,5 +22,14 @@ module GraphqlConnector
 
   def self.configure
     yield(configuration)
+  end
+
+  def self.query(model, conditions, selected_fields)
+    query_string = QueryBuilder.new(model, conditions, selected_fields).create
+    response = HTTParty.post(GraphqlConnector.configuration.host,
+                             headers: GraphqlConnector.configuration.headers,
+                             body: { query: query_string })
+    parsed_body = JSON.parse(response.body)
+    OpenStruct.new(parsed_body['data']['product'])
   end
 end

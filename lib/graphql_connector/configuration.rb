@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module GraphqlConnector
   class Configuration
     attr_accessor :host, :headers

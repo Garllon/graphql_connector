@@ -5,8 +5,8 @@ Version](https://badge.fury.io/rb/graphql_connector.svg)](https://badge.fury.io/
 [![Build
 Status](https://travis-ci.org/Garllon/graphql_connector.svg?branch=master)](https://travis-ci.org/Garllon/graphql_connector)
 
-An easy connector to call your `graphql` server. 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/graphql_connector`. To experiment with that code, run `bin/console` for an interactive prompt.
+An easy connector to call your `graphql` server. Currently there is no schema
+check in the code, but i will add this.
 
 ## Installation
 
@@ -53,7 +53,10 @@ bundle install
 ```
 
 Then, run
-```bundle exec rspec spec` to run the tests.
+```shell
+bundle exec rspec spec
+```
+to run the tests.
 You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 ## Contributing

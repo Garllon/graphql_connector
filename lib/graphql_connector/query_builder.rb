@@ -1,8 +1,8 @@
 module GraphqlConnector
   class QueryBuilder
-    def initialize(model, where_conditions, selected_fields)
+    def initialize(model, conditions, selected_fields)
       @model            = model
-      @where_conditions = where_conditions
+      @conditions       = conditions
       @selected_fields  = selected_fields
     end
 
@@ -13,7 +13,7 @@ module GraphqlConnector
 	private
 
 	def main_filter
-	  conditions = @where_conditions.each_with_object([]) do |(key, value), array|
+	  conditions = @conditions.each_with_object([]) do |(key, value), array|
 		next if value.is_a? Hash # will be processed in #field_with_filter
 
 		array << "#{lowercase(key)}: #{value_as_parameter(value)}"

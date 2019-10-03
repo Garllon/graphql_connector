@@ -6,8 +6,6 @@ require 'graphql_connector/configuration'
 require 'httparty'
 
 module GraphqlConnector
-  class Error < StandardError; end
-  # Your code goes here...
   class << self
     attr_accessor :configuration
   end

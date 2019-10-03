@@ -1,4 +1,6 @@
-require "graphql_connector/version"
+# frozen_string_literal: true
+
+require 'graphql_connector/version'
 
 module GraphqlConnector
   class Error < StandardError; end

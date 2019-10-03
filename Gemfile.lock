@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    graphql_connector (0.1.0)
+    graphql_connector (0.1.0.beta)
       httparty (~> 0.17)
 
 GEM
@@ -56,7 +56,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 2.0)
   graphql_connector!
-  pry
+  pry (~> 0.10)
   rake (~> 10.0)
   rspec (~> 3.8)
   rubocop (~> 0.75)

@@ -16,15 +16,11 @@ module GraphqlConnector
 	  conditions = @conditions.each_with_object([]) do |(key, value), array|
 		next if value.is_a? Hash # will be processed in #field_with_filter
 
-		array << "#{lowercase(key)}: #{value_as_parameter(value)}"
+		array << "#{key}: #{value_as_parameter(value)}"
 	  end
 
 	  conditions.join(', ')
 	end
-
-    def lowercase(field)
-      field.to_s.sub!(field[0], field[0].downcase)
-    end
 
 	def value_as_parameter(value)
 	  case value

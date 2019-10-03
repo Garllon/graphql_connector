@@ -1,5 +1,7 @@
 # GraphqlConnector
 
+[![Gem
+Version](https://badge.fury.io/rb/graphql_connector.svg)](https://badge.fury.io/rb/graphql_connector)
 [![Build
 Status](https://travis-ci.org/Garllon/graphql_connector.svg?branch=master)](https://travis-ci.org/Garllon/graphql_connector)
 

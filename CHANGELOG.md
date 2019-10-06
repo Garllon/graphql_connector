@@ -3,7 +3,7 @@
 
 TBA
 
-### 0.1.0.beta
+### 0.1.0.beta1
 
 ** BugFix
 use model instead of hardcoded product

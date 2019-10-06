@@ -28,6 +28,6 @@ module GraphqlConnector
                              headers: GraphqlConnector.configuration.headers,
                              body: { query: query_string })
     parsed_body = JSON.parse(response.body)
-    OpenStruct.new(parsed_body['data']['product'])
+    OpenStruct.new(parsed_body['data'][model])
   end
 end

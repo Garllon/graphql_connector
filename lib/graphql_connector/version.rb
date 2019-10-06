@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module GraphqlConnector
-  VERSION = '0.1.0.beta'
+  VERSION = '0.1.0.beta1'
 end

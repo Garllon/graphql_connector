@@ -9,7 +9,7 @@ module GraphqlConnector
     end
 
     def create
-      "query { #{@model}(#{main_filter}) { #{@selected_fields.join(' ')} } }"
+      "query { #{@model}(#{main_filter}) { #{parse_fields(@selected_fields)} } }"
     end
 
     private
@@ -33,6 +33,25 @@ module GraphqlConnector
         "[#{casted_values.join(',')}]"
       else # fallback to string
         '"' + value.to_s + '"'
+      end
+    end
+
+    def parse_fields(selected_fields)
+      results = selected_fields.map do |field|
+        case field
+        when Hash
+          handle_association(field)
+        else
+          field
+        end
+      end
+
+      results.join(' ')
+    end
+
+    def handle_association(hash)
+      hash.map do |key, fields|
+        "#{key} { #{parse_fields(fields)} }"
       end
     end
   end

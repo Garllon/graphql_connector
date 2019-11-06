@@ -10,8 +10,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Garllon']
   spec.email         = ['palluthe.bennet@gmail.com']
 
-  spec.summary       = 'Hallo'
-  spec.description   = 'Hallo'
+  spec.summary       = 'Simple GraphQL client'
+  spec.description   = 'Simple grahql client to query with your own raw string'\
+                       'or with the samll helper method query.'
   spec.homepage      = 'https://github.com/Garllon/graphql_connector/blob/master/README.md'
   spec.license       = 'MIT'
 

@@ -25,13 +25,19 @@ module GraphqlConnector
 
   def self.query(model, conditions, selected_fields)
     query_string = QueryBuilder.new(model, conditions, selected_fields).create
+    parsed_body = raw_query(query_string)
+    OpenStruct.new(parsed_body['data'][model])
+  end
+
+  def self.raw_query(query_string)
     response = HTTParty.post(GraphqlConnector.configuration.host,
                              headers: GraphqlConnector.configuration.headers,
                              body: { query: query_string })
     parsed_body = JSON.parse(response.body)
-    OpenStruct.new(parsed_body['data'][model])
+    
     if parsed_body.has_key? 'errors'
       raise CustomAttributeError.new parsed_body['errors']
     end
+    parsed_body
   end
 end

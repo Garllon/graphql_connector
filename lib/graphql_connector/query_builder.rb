@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module GraphqlConnector
+  # create the graphql query_string out of the given attributes.
   class QueryBuilder
     def initialize(model, conditions, selected_fields)
       @model            = model
@@ -9,7 +10,7 @@ module GraphqlConnector
     end
 
     def create
-      "query { #{@model}(#{main_filter}) { #{parse_fields(@selected_fields)} } }"
+      "query { #{main_filter} { #{parse_fields(@selected_fields)} } }"
     end
 
     private
@@ -21,7 +22,7 @@ module GraphqlConnector
         array << "#{key}: #{value_as_parameter(value)}"
       end
 
-      conditions.join(', ')
+      "#{@model}(#{conditions.join(', ')})"
     end
 
     def value_as_parameter(value)

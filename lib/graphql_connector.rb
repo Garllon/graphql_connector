@@ -6,6 +6,9 @@ require 'graphql_connector/configuration'
 require 'graphql_connector/custom_attribute_error'
 require 'httparty'
 
+# Main file of the GraphQLConnector
+#   the main methods to configure the gem
+#   and to run a raw_query or a normal query.
 module GraphqlConnector
   class << self
     attr_accessor :configuration
@@ -34,10 +37,11 @@ module GraphqlConnector
                              headers: GraphqlConnector.configuration.headers,
                              body: { query: query_string })
     parsed_body = JSON.parse(response.body)
-    
-    if parsed_body.has_key? 'errors'
-      raise CustomAttributeError.new parsed_body['errors']
+
+    if parsed_body.key? 'errors'
+      raise CustomAttributeError, parsed_body['errors']
     end
+
     parsed_body
   end
 end

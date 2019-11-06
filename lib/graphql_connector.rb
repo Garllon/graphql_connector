@@ -30,5 +30,8 @@ module GraphqlConnector
                              body: { query: query_string })
     parsed_body = JSON.parse(response.body)
     OpenStruct.new(parsed_body['data'][model])
+    if parsed_body.has_key? 'errors'
+      raise CustomAttributeError.new parsed_body['errors']
+    end
   end
 end

@@ -34,16 +34,42 @@ GraphqlConnector.configure do |config|
 end
 ```
 
+### raw_query
+
 Then you can call your graphql_endpoint:
 ```ruby
 GraphqlConnector.query(model, condition, selected_fields)
 ```
 
-| Variable        | DataType         | Example        |
-| ----------------|------------------| ---------------|
-| model           | String           | 'product'      |
-| condition       | Hash(key, value) | { id: 1 }      |
-| selected_fields | Array of Strings | ['id', 'name'] |
+### query
+
+Or your are using the more comfortable `query`:
+```ruby
+GraphqlConnector.query(model, condition, selected_fields)
+```
+
+| Variable        | DataType                | Example                                 |
+|----------------|-------------------------|------------------------------------------|
+| model           | String                  | 'product'                               |
+| condition       | Hash(key, value)        | { id: 1 }                               |
+| selected_fields | Array of Strings/Hashes | ['id', 'name', productCategory: ['id']] |
+
+> Caution:
+> You get an OpenStruct back. Currently only the first level attributes are
+> supported with OpenStruct, associated objects are still a normal array of
+> hashes. 
+
+#### selected_fields
+
+The synatx for the associations looks like the following:
+```
+['<attribute_name>', <association_name>: ['<attribute_name_of_the_association>']]
+```
+
+Example:
+```ruby
+['id', 'name', productCategory: ['id', 'name']]
+```
 
 ## Development
 

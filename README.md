@@ -6,7 +6,7 @@ Version](https://badge.fury.io/rb/graphql_connector.svg)](https://badge.fury.io/
 Status](https://travis-ci.org/Garllon/graphql_connector.svg?branch=master)](https://travis-ci.org/Garllon/graphql_connector)
 
 An easy connector to call your `graphql` server. Currently there is no schema
-check in the code, but i will add this.
+check in the code, but i will add it.
 
 ## Installation
 
@@ -38,12 +38,12 @@ end
 
 Then you can call your graphql_endpoint:
 ```ruby
-GraphqlConnector.query(model, condition, selected_fields)
+GraphqlConnector.raw_query(query_string)
 ```
 
 ### query
 
-Or your are using the more comfortable `query`:
+You can also use the more comfortable `query`:
 ```ruby
 GraphqlConnector.query(model, condition, selected_fields)
 ```
@@ -87,7 +87,7 @@ You can also run `bin/console` for an interactive prompt that will allow you to 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/garllon/graphql_connector. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at [https://github.com/garllon/graphql_connector](https://github.com/garllon/graphql_connector). This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 

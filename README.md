@@ -66,7 +66,7 @@ GraphqlConnector::<name>.query(model, condition, selected_fields)
 
 #### selected_fields
 
-The synatx for the associations looks like the following:
+The syntax for the associations looks like the following:
 ```
 ['<attribute_name>', <association_name>: ['<attribute_name_of_the_association>']]
 ```

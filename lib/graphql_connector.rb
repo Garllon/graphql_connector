@@ -4,6 +4,7 @@ require 'graphql_connector/version'
 require 'graphql_connector/query_builder'
 require 'graphql_connector/configuration'
 require 'graphql_connector/http_client'
+require 'graphql_connector/base_server_type'
 require 'graphql_connector/custom_attribute_error'
 require 'httparty'
 

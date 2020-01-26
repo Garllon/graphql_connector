@@ -3,11 +3,21 @@
 module GraphqlConnector
   # The configuration template file for the gem.
   class Configuration
-    attr_accessor :host, :headers
+    attr_reader :base_server_types
 
     def initialize
-      @host = nil
-      @headers = nil
+      @base_server_types = {}
+    end
+
+    def add_server(name:, uri:, headers:)
+      @base_server_types[name] = BaseServerType.build(name, uri, headers)
+    end
+
+    def reset!
+      @base_server_types.keys.each do |name|
+        GraphqlConnector.send :remove_const, name
+      end
+      @base_server_types = {}
     end
   end
 end

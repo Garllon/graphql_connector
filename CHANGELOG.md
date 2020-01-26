@@ -1,9 +1,15 @@
+## 1.0.0 (2020-1-26)
+
+### Breaking
+* add multiple graphql server querying
+* `query` and `raw_query` nested under server namespace
+
 
 ## 0.2.0 (2019-11-19)
 
 ### Features
 * new `raw_query` method. you have to write the graphql query
-  string by your self and also you get only the parsed json back. 
+  string by your self and also you get only the parsed json back.
 * query supports associations for the selected_fields attribute
 
 ## 0.1.0.beta1 (2019-10-06)

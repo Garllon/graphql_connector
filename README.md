@@ -1,3 +1,4 @@
+
 # GraphqlConnector
 
 [![Gem
@@ -30,23 +31,26 @@ Or install it yourself as:
 You need to configure the `graphql_connector` first:
 ``` ruby
 GraphqlConnector.configure do |config|
-  config.host = ''
-  config.headers = {}
+  config.add_server(name: 'Foo', uri: 'http://foo.com/api/graphql', headers: {})
 end
+
+For each graphql server you wish to query use `add_server`.
 ```
 
 ### raw_query
 
 Then you can call your graphql_endpoint:
 ```ruby
-GraphqlConnector.raw_query(query_string)
+GraphqlConnector::<name>.raw_query(query_string)
 ```
+
+Note that `<name>` has to be replaced by any of the ones added via `add_mapping`
 
 ### query
 
 You can also use the more comfortable `query`:
 ```ruby
-GraphqlConnector.query(model, condition, selected_fields)
+GraphqlConnector::<name>.query(model, condition, selected_fields)
 ```
 
 | Variable        | DataType                | Example                                 |
@@ -58,7 +62,7 @@ GraphqlConnector.query(model, condition, selected_fields)
 > Caution:
 > You get an OpenStruct back. Currently only the first level attributes are
 > supported with OpenStruct, associated objects are still a normal array of
-> hashes. 
+> hashes.
 
 #### selected_fields
 

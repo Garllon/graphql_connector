@@ -44,7 +44,7 @@ Then you can call your graphql_endpoint:
 GraphqlConnector::<name>.raw_query(query_string)
 ```
 
-Note that `<name>` has to be replaced by any of the ones added via `add_mapping`
+Note that `<name>` has to be replaced by any of the ones added via `add_server`
 
 ### query
 
@@ -100,4 +100,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the GraphqlConnector project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/graphql_connector/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the GraphqlConnector project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/Garllon/graphql_connector/blob/master/CODE_OF_CONDUCT.md).

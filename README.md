@@ -93,7 +93,7 @@ Example:
 This approach can be used to `graphqlize` **any** kind of ruby (service) class
 so that it has re-usable graphql query methods.
 
-* First add `include GraphqlConnector::<server>::Query` in the the class
+* First add `extend GraphqlConnector::<server>::Query` in the the class
 * Add a `return_fields` which defines what fields are going to be returned
 * Next for each mapping add a `query` that alias the type that the server supports as follows
   * `query <alias>: <query type in graphql server>, params: [<any kind of query type params>]`

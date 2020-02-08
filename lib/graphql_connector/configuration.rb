@@ -15,6 +15,7 @@ module GraphqlConnector
 
     def reset!
       @base_server_types.keys.each do |name|
+        GraphqlConnector.const_get(name).send :remove_const, 'Query'
         GraphqlConnector.send :remove_const, name
       end
       @base_server_types = {}

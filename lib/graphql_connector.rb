@@ -22,6 +22,7 @@ module GraphqlConnector
   end
 
   def self.reset
+    @configuration.reset!
     @configuration = Configuration.new
   end
 

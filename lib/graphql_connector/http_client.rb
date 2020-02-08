@@ -13,16 +13,17 @@ module GraphqlConnector
                                                         conditions,
                                                         selected_fields).create
       parsed_body = raw_query(query_string)
-      result = parsed_body['data'][model]
+      result = parsed_body['data'][model.to_s]
       return OpenStruct.new(result) unless result.is_a? Array
 
       result.map { |entry| OpenStruct.new(entry) }
     end
 
-    def raw_query(query_string)
+    def raw_query(query_string, variables: {})
       response = HTTParty.post(@uri,
                                headers: @headers,
-                               body: { query: query_string })
+                               body: { query: query_string,
+                                       variables: variables })
       parsed_body = JSON.parse(response.body)
       verify_response!(parsed_body)
       parsed_body

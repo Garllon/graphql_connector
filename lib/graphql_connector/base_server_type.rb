@@ -11,6 +11,7 @@ module GraphqlConnector
         base_object = GraphqlConnector.const_set(name, base_class)
         inject_http_client(base_object)
         inject_query_methods(base_object)
+        create_service_class_module(base_object)
 
         base_object
       end
@@ -23,6 +24,20 @@ module GraphqlConnector
         raise BaseServerTypeAlreadyExistsError,
               "The name: #{name} is already in use. Check your "\
               'configuration!'
+      end
+
+      def create_service_class_module(base_object)
+        base_object.class_eval <<-METHOD, __FILE__, __LINE__ + 1
+          module Query
+            def self.extended(base)
+              base.include(GraphqlConnector::ServiceClassable::Query)
+            end
+
+            def http_client
+              #{base_object}.http_client
+            end
+          end
+        METHOD
       end
 
       def class_with(uri, headers)
@@ -47,8 +62,8 @@ module GraphqlConnector
             http_client.query(model, conditions, selected_fields)
           end
 
-          def raw_query(query_string)
-            http_client.raw_query(query_string)
+          def raw_query(query_string, variables: {})
+            http_client.raw_query(query_string, variables)
           end
         end
       end

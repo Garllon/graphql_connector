@@ -1,3 +1,9 @@
+## 1.1.0 (2020-2-8)
+
+### Features
+* Allow building graphql querying in custom classes via `service class inclusion`
+* See `README` for details about `service class inclusion`
+
 ## 1.0.0 (2020-1-26)
 
 ### Breaking

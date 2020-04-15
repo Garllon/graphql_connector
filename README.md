@@ -167,7 +167,7 @@ class Product
 end
 
 Product.all
-=> [ { id: '1', name: 'Demo Product', ...]
+=> [ { id: '1', name: 'Demo Product' }, ...]
 
 Product.by(id: '1', name: 'Demo Product')
 => { id: '1', name: 'Demo Product' }

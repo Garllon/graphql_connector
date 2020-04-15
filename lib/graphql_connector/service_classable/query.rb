@@ -71,8 +71,7 @@ module GraphqlConnector
         def validate_mapping!(type_mapping)
           return if type_mapping.size == 1 &&
                     type_mapping.first[0].is_a?(Symbol) &&
-                    (type_mapping.first[1].is_a?(Symbol) ||
-                    type_mapping.first[1].is_a?(String))
+                    [String, Symbol].member?(type_mapping.first[1].class)
 
           raise InvalidTypeMappingError,
                 "Please ensure that #{type_mapping} has the following format "\

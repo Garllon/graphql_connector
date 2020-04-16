@@ -23,35 +23,34 @@ module GraphqlConnector
           @return_fields.merge(fields)
         end
 
-        def query(**type_mapping)
-          params = type_mapping.delete(:params) || {}
-          method_name = type_mapping.first[0]
-          query_type = type_mapping.first[1]
-          raw_query = query_type.is_a?(String)
-          validate!(type_mapping, params)
+        def query(build_params)
+          class_method_name = build_params.first[0]
+          query_type = build_params.first[1]
+          params = build_params[:params] || build_params['params'] || []
+          ReturnFieldsValidator.validate(@return_fields)
+          ClassMethodValidator.validate(class_method_name, query_type)
 
-          if params.empty?
-            return query_method(method_name, query_type, raw_query)
-          end
+          return query_method(class_method_name, query_type) if params.empty?
 
-          keyword_query_method(method_name, query_type, params, raw_query)
+          ParamsValidator.validate(params)
+          keyword_query_method(class_method_name, query_type, params)
         end
 
         private
 
-        def query_method(name, query_type, raw_query)
+        def query_method(name, query_type)
           define_singleton_method name do
-            return http_client.raw_query(query_type) if raw_query
+            return http_client.raw_query(query_type) if query_type.is_a?(String)
 
             http_client.query(query_type, {}, @return_fields.to_a)
           end
         end
 
-        def keyword_query_method(name, query_type, params, raw_query)
+        def keyword_query_method(name, query_type, params)
           params = [params].flatten
           instance_eval <<-METHOD, __FILE__, __LINE__ + 1
             def #{name}(#{params.map { |keyword| "#{keyword}:" }.join(', ')})
-              if #{raw_query}
+              if #{query_type.is_a?(String)}
                 http_client
                   .raw_query("#{query_type}", variables: #{CONDITIONS})
               else
@@ -60,38 +59,6 @@ module GraphqlConnector
               end
             end
           METHOD
-        end
-
-        def validate!(type_mapping, params)
-          validate_mapping!(type_mapping)
-          validate_params!(params) unless params.empty?
-          validate_return_fields!
-        end
-
-        def validate_mapping!(type_mapping)
-          return if type_mapping.size == 1 &&
-                    type_mapping.first[0].is_a?(Symbol) &&
-                    [String, Symbol].member?(type_mapping.first[1].class)
-
-          raise InvalidTypeMappingError,
-                "Please ensure that #{type_mapping} has the following format "\
-                '=> <alias>: <graphql server type> (e.g. all: :all_products)'
-        end
-
-        def validate_params!(params)
-          return if params.is_a?(Symbol) ||
-                    params.map(&:class).uniq == [Symbol]
-
-          raise InvalidParamsErrors,
-                "Please ensure that #{params} is either a Symbol or an Array "\
-                'of Symbols as described in the README'
-        end
-
-        def validate_return_fields!
-          return if defined?(@return_fields) && !@return_fields.empty?
-
-          raise ReturnFieldsErrors, 'No return_fields defined. Please consult '\
-                                    'README'
         end
       end
     end

@@ -152,7 +152,7 @@ describe GraphqlConnector::ServiceClassable::Query do
     end
   end
 
-  context 'with invalid type_mapping' do
+  context 'with invalid build_params' do
     let(:camper) do
       class Camper2
         include GraphqlConnector::ServiceClassable::Query
@@ -161,12 +161,12 @@ describe GraphqlConnector::ServiceClassable::Query do
         query all: Class
       end
     end
-    let(:type_mapping_error) do
-      GraphqlConnector::ServiceClassable::InvalidTypeMappingError
+    let(:invalid_class_method_error) do
+      GraphqlConnector::ServiceClassable::InvalidClassMethodError
     end
 
-    it 'raises an InvalidTypeMappingError' do
-      expect { camper }.to raise_error(type_mapping_error)
+    it 'raises an InvalidClassMethodError' do
+      expect { camper }.to raise_error(invalid_class_method_error)
     end
   end
 
@@ -180,9 +180,9 @@ describe GraphqlConnector::ServiceClassable::Query do
       end
     end
 
-    it 'raises an InvalidParamsErrors' do
+    it 'raises an InvalidParamsError' do
       expect { camper }
-        .to raise_error(GraphqlConnector::ServiceClassable::InvalidParamsErrors)
+        .to raise_error(GraphqlConnector::ServiceClassable::InvalidParamsError)
     end
   end
 end

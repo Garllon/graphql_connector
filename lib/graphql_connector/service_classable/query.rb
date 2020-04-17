@@ -18,28 +18,23 @@ module GraphqlConnector
                         [var, binding.local_variable_get(var)]
                       end.to_h'
 
-        def return_fields(*fields)
-          @return_fields ||= Set.new
-          @return_fields.merge(fields)
-        end
-
-        def add_query(build_params)
+        def add_query(params: [], returns:, **build_params)
           class_method_name = build_params.first[0]
           query_type = build_params.first[1]
-          params = build_params[:params] || build_params['params'] || []
-          ReturnFieldsValidator.validate(@return_fields)
+          ReturnFieldsValidator.validate(returns)
           ClassMethodValidator.validate(class_method_name, query_type)
 
-          return query_method(class_method_name, query_type) if params.empty?
+          if params.empty?
+            return query_method(class_method_name, query_type, returns)
+          end
 
           ParamsValidator.validate(params)
-          query_keyword_method(class_method_name, query_type, params)
+          query_keyword_method(class_method_name, query_type, params, returns)
         end
 
-        def add_raw_query(build_params)
+        def add_raw_query(params: [], **build_params)
           class_method_name = build_params.first[0]
           query_string = build_params.first[1]
-          params = build_params[:params] || build_params['params'] || []
           ClassMethodValidator.validate(class_method_name, query_string)
 
           if params.empty?
@@ -52,9 +47,9 @@ module GraphqlConnector
 
         private
 
-        def query_method(class_method_name, query_type)
+        def query_method(class_method_name, query_type, return_fields)
           define_singleton_method class_method_name do
-            http_client.query(query_type, {}, @return_fields.to_a)
+            http_client.query(query_type, {}, return_fields.to_a)
           end
         end
 
@@ -64,13 +59,13 @@ module GraphqlConnector
           end
         end
 
-        def query_keyword_method(name, query_type, keywords)
+        def query_keyword_method(name, query_type, keywords, return_fields)
           keywords = [keywords].flatten
           instance_eval <<-METHOD, __FILE__, __LINE__ + 1
             def #{name}(#{keywords.map { |keyword| "#{keyword}:" }.join(', ')})
               http_client.query("#{query_type}",
                                 #{CONDITIONS},
-                                #{@return_fields.to_a})
+                                #{return_fields.to_a})
             end
           METHOD
         end

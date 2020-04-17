@@ -7,10 +7,10 @@ describe GraphqlConnector::ServiceClassable::Query do
     class Car
       include GraphqlConnector::ServiceClassable::Query
 
-      return_fields :id, :name
-
-      add_query all_cars: :cars_all
-      add_query by_id_name: :cars_by_params, params: %i[id name]
+      add_query all_cars: :cars_all, returns: %i[id name]
+      add_query by_id_name: :cars_by_params,
+                params: %i[id name],
+                returns: %i[id name]
       add_raw_query raw: 'query { cars { id, name } }'
       add_raw_query raw_by_id_name: 'query cars($id: !ID, $name: !String) '\
                                     '{ cars(id: $id, name: $name) }',
@@ -100,10 +100,7 @@ describe GraphqlConnector::ServiceClassable::Query do
       class Truck
         include GraphqlConnector::ServiceClassable::Query
 
-        return_fields :truck_id
-        return_fields [brand: :name]
-
-        add_query all_trucks: :trucks_all
+        add_query all_trucks: :trucks_all, returns: [:truck_id, brand: :name]
       end
     end
     let(:truck_client) do
@@ -128,7 +125,7 @@ describe GraphqlConnector::ServiceClassable::Query do
       it 'forwards params to http_client' do
         expect(truck_client)
           .to receive(:query)
-          .with(:trucks_all, {}, [:truck_id, [{ brand: :name }]])
+          .with(:trucks_all, {}, [:truck_id, brand: :name])
 
         all_trucks
       end
@@ -137,28 +134,12 @@ describe GraphqlConnector::ServiceClassable::Query do
     end
   end
 
-  context 'when undefined return_fields' do
-    let(:camper) do
-      class Camper1
-        include GraphqlConnector::ServiceClassable::Query
-
-        add_query all: :camper_all
-      end
-    end
-
-    it 'raises an ReturnFieldsErrors' do
-      expect { camper }
-        .to raise_error(GraphqlConnector::ServiceClassable::ReturnFieldsErrors)
-    end
-  end
-
   context 'with invalid build_params' do
     let(:camper) do
       class Camper2
         include GraphqlConnector::ServiceClassable::Query
 
-        return_fields :id
-        add_query all: Class
+        add_query all: Class, returns: [:id]
       end
     end
     let(:invalid_class_method_error) do
@@ -175,8 +156,7 @@ describe GraphqlConnector::ServiceClassable::Query do
       class Camper3
         include GraphqlConnector::ServiceClassable::Query
 
-        return_fields :id
-        add_query all: :all_campers, params: [Class]
+        add_query all: :all_campers, params: [Class], returns: [:id]
       end
     end
 

@@ -7,10 +7,35 @@ module GraphqlConnector
     class ReturnFieldsValidator
       class << self
         def validate(return_fields)
-          return if !return_fields.nil? && !return_fields.empty?
+          unless return_fields.is_a?(Array)
+            raise ReturnFieldsErrors, 'Please ensure that returns is followed '\
+                                      'by an array. E.g. returns: [:id]'
+          end
 
-          raise ReturnFieldsErrors, 'No return_fields defined. Please consult '\
-                                    'README'
+          return_fields.each { |entry| recursive_validation(entry) }
+        end
+
+        private
+
+        def recursive_validation(entry)
+          case entry
+          when Hash
+            hash_validation(entry)
+          when Array
+            entry.each { |item| recursive_validation(item) }
+          else
+            return if [String, Symbol].member?(entry.class)
+
+            raise ReturnFieldsErrors, "The #{entry} is neither a String nor a"\
+                                      'Symbol!'
+          end
+        end
+
+        def hash_validation(hash)
+          hash.each do |key, value|
+            recursive_validation(key)
+            recursive_validation(value)
+          end
         end
       end
     end

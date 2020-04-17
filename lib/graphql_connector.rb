@@ -8,7 +8,7 @@ require 'graphql_connector/base_server_type'
 require 'graphql_connector/service_classable/class_method_validator'
 require 'graphql_connector/service_classable/params_validator'
 require 'graphql_connector/service_classable/return_fields_validator'
-require 'graphql_connector/service_classable/query'
+require 'graphql_connector/service_classable/queryable'
 require 'graphql_connector/custom_attribute_error'
 require 'httparty'
 

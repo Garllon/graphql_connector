@@ -30,7 +30,7 @@ module GraphqlConnector
         base_object.class_eval <<-METHOD, __FILE__, __LINE__ + 1
           module Query
             def self.extended(base)
-              base.include(GraphqlConnector::ServiceClassable::Query)
+              base.extend(GraphqlConnector::ServiceClassable::Queryable)
             end
 
             def http_client

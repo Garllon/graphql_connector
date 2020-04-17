@@ -2,9 +2,6 @@
 
 module GraphqlConnector
   module ServiceClassable
-    class InvalidTypeMappingError < StandardError; end
-    class InvalidParamsErrors < StandardError; end
-    class ReturnFieldsErrors < StandardError; end
     # Base module that is invoked in BaseServerType
     module Query
       def self.included(base)

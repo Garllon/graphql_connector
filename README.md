@@ -151,7 +151,6 @@ Also custom **class methods** can used to call any kind of `query` and do furthe
 ```ruby
 class Product
   extend GraphqlConnector::Foo::Query
-  return_fields :id, :name, product_category: [:id, :name]
 
   add_query all: :products_all, returns: [:name]
 

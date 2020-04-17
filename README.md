@@ -113,7 +113,7 @@ class Product
 
   query all: :products_all
   query by_id: :products_all, params: :id
-  query by_names: :product_all, params: :names
+  query 'by_names' => 'product_all', 'params' => 'names'
   query by: :product_all, params: [:id, :name]
   query by_category_id: :product_all, params: :product_category
 end
@@ -138,7 +138,7 @@ Also custom **class methods** can used to call any kind of `query` and do furthe
 
 ```ruby
 class Product
-  include GraphqlConnector::Foo::Query
+  extend GraphqlConnector::Foo::Query
   return_fields :id, :name, product_category: [:id, :name]
 
   query all: :products_all
@@ -156,12 +156,11 @@ Last but not least raw queries can also be used, like the following:
 
 ```ruby
 class Product
-  include GraphqlConnector::Foo::Query
-  return_fields :id, :name, product_category: [:id, :name]
+  extend GraphqlConnector::Foo::Query
 
-  query all: ' query { products { id name } } '
-  query by: ' query { products($id: !ID, $name: !String) '\
-            '{ products(id: $id, name: $name) { id name } } } ',
+  raw_query all: ' query { products { id name } } '
+  raw_query by: ' query { products($id: !ID, $name: !String) '\
+                '{ products(id: $id, name: $name) { id name } } } ',
              params: [:id, :name]
 
 end
@@ -173,6 +172,8 @@ Product.by(id: '1', name: 'Demo Product')
 => { id: '1', name: 'Demo Product' }
 
 ```
+
+When using only raw queries in a class `return_fields` can be omitted (since return fields )
 
 ## Development
 

@@ -11,10 +11,10 @@ describe GraphqlConnector::ServiceClassable::Query do
 
       query all_cars: :cars_all
       query by_id_name: :cars_by_params, params: %i[id name]
-      query raw: 'query { cars { id, name } }'
-      query raw_by_id_name: 'query { cars($id: !ID, $name: !String) '\
-                            '{ cars(id: $id, name: $name) } }',
-            params: %i[id name]
+      raw_query raw: 'query { cars { id, name } }'
+      raw_query raw_by_id_name: 'query { cars($id: !ID, $name: !String) '\
+                                '{ cars(id: $id, name: $name) } }',
+                params: %i[id name]
     end
   end
   let(:car_client) do

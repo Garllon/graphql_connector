@@ -93,11 +93,12 @@ Example:
 This approach can be used to `graphqlize` **any** kind of ruby (service) class
 so that it has re-usable graphql query methods.
 
-* First add `extend GraphqlConnector::<server>::Query` in the the class
+* First add `extend GraphqlConnector::<server>::Query` in the the class(es) that should be `graphqlized`
 * Add a `return_fields` which defines what fields are going to be returned
-* Next for each mapping add a `query` that alias the type that the server supports as follows
-  * `query <alias>: <query type in graphql server>, params: [<any kind of query type params>]`
-  * If query type does not need them, omit `params`
+* Next for each mapping add a `add_query` or `add_raw_query` aliasing the graphql server type supports as follows:
+  * `add_query <alias>: <query type in graphql server>, params: [<any kind of query type params>]`
+  * `add_raw_query <alias>: <query string>, params: [<any kind of query type params>]`
+  * If <query type>/<query string> does not need them, omit `params`
 
 Examples:
 
@@ -111,11 +112,11 @@ class Product
   extend GraphqlConnector::Foo::Query
   return_fields :id, :name, product_category: [:id, :name]
 
-  query all: :products_all
-  query by_id: :products_all, params: :id
-  query 'by_names' => 'product_all', 'params' => 'names'
-  query by: :product_all, params: [:id, :name]
-  query by_category_id: :product_all, params: :product_category
+  add_query all: :products_all
+  add_query by_id: :products_all, params: :id
+  add_query 'by_names' => 'product_all', 'params' => 'names'
+  add_query by: :product_all, params: [:id, :name]
+  add_query by_category_id: :product_all, params: :product_category
 end
 
 Product.all
@@ -141,7 +142,7 @@ class Product
   extend GraphqlConnector::Foo::Query
   return_fields :id, :name, product_category: [:id, :name]
 
-  query all: :products_all
+  add_query all: :products_all
 
   def self.by_id(id:)
     all.select { |products| products.id == id }.first
@@ -152,15 +153,15 @@ Product.by_id(id: 1)
 => OpenStruct<id=1, name='Demo Product', product_category=<ProductCategory<id=10, name='Demo Category'>>
 ```
 
-Last but not least raw queries can also be used, like the following:
+Example for `raw_query`:
 
 ```ruby
 class Product
   extend GraphqlConnector::Foo::Query
 
-  raw_query all: ' query { products { id name } } '
-  raw_query by: ' query { products($id: !ID, $name: !String) '\
-                '{ products(id: $id, name: $name) { id name } } } ',
+  add_raw_query all: ' query { products { id name } } '
+  add_raw_query by: ' query products($id: !ID, $name: !String) '\
+                '{ products(id: $id, name: $name) { id name } }',
              params: [:id, :name]
 
 end

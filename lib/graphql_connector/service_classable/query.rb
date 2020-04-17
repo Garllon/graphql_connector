@@ -23,7 +23,7 @@ module GraphqlConnector
           @return_fields.merge(fields)
         end
 
-        def query(build_params)
+        def add_query(build_params)
           class_method_name = build_params.first[0]
           query_type = build_params.first[1]
           params = build_params[:params] || build_params['params'] || []
@@ -36,7 +36,7 @@ module GraphqlConnector
           query_keyword_method(class_method_name, query_type, params)
         end
 
-        def raw_query(build_params)
+        def add_raw_query(build_params)
           class_method_name = build_params.first[0]
           query_string = build_params.first[1]
           params = build_params[:params] || build_params['params'] || []

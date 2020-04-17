@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe GraphqlConnector::ServiceClassable::Query do
+describe GraphqlConnector::ServiceClassable::Queryable do
   let!(:car) do
     class Car
-      include GraphqlConnector::ServiceClassable::Query
+      extend GraphqlConnector::ServiceClassable::Queryable
 
       add_query all_cars: :cars_all, returns: %i[id name]
       add_query by_id_name: :cars_by_params,
@@ -98,7 +98,7 @@ describe GraphqlConnector::ServiceClassable::Query do
   context 'with another service class' do
     let!(:truck) do
       class Truck
-        include GraphqlConnector::ServiceClassable::Query
+        extend GraphqlConnector::ServiceClassable::Queryable
 
         add_query all_trucks: :trucks_all, returns: [:truck_id, brand: :name]
       end
@@ -137,7 +137,7 @@ describe GraphqlConnector::ServiceClassable::Query do
   context 'with invalid build_params' do
     let(:camper) do
       class Camper2
-        include GraphqlConnector::ServiceClassable::Query
+        extend GraphqlConnector::ServiceClassable::Queryable
 
         add_query all: Class, returns: [:id]
       end
@@ -154,7 +154,7 @@ describe GraphqlConnector::ServiceClassable::Query do
   context 'with invalid params' do
     let(:camper) do
       class Camper3
-        include GraphqlConnector::ServiceClassable::Query
+        extend GraphqlConnector::ServiceClassable::Queryable
 
         add_query all: :all_campers, params: [Class], returns: [:id]
       end

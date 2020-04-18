@@ -2,6 +2,47 @@
 
 require 'spec_helper'
 
+shared_examples 'runs common validations' do
+  it 'validates class method on object' do
+    expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
+      .to receive(:validate_class_method).with(:by_id, object)
+
+    subject
+  end
+
+  it 'validates params' do
+    expect(GraphqlConnector::ServiceClassable::ParamsValidator)
+      .to receive(:validate).with(params)
+
+    subject
+  end
+end
+
+shared_examples 'common class method creation' do
+  it 'creates a class method by_id(id:) on object' do
+    subject
+
+    expect(object).to respond_to(:by_id).with_keywords(:id)
+  end
+
+  context 'without params' do
+    let(:params) { [] }
+
+    it 'does not validate params' do
+      expect(GraphqlConnector::ServiceClassable::ParamsValidator)
+        .not_to receive(:validate)
+
+      subject
+    end
+
+    it 'creates a class method by_id on object' do
+      subject
+
+      expect(object).to respond_to(:by_id)
+    end
+  end
+end
+
 describe GraphqlConnector::ServiceClassable::Queryable do
   let(:object) do
     class Currency
@@ -34,12 +75,7 @@ describe GraphqlConnector::ServiceClassable::Queryable do
       add_query
     end
 
-    it 'validates class method on object' do
-      expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
-        .to receive(:validate_class_method).with(:by_id, object)
-
-      add_query
-    end
+    it_behaves_like 'runs common validations'
 
     it 'validates query type' do
       expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
@@ -48,35 +84,7 @@ describe GraphqlConnector::ServiceClassable::Queryable do
       add_query
     end
 
-    it 'validates params' do
-      expect(GraphqlConnector::ServiceClassable::ParamsValidator)
-        .to receive(:validate).with(params)
-
-      add_query
-    end
-
-    it 'creates a class method by_id(id:) on object' do
-      add_query
-
-      expect(object).to respond_to(:by_id).with_keywords(:id)
-    end
-
-    context 'without params' do
-      let(:params) { [] }
-
-      it 'does not validate params' do
-        expect(GraphqlConnector::ServiceClassable::ParamsValidator)
-          .not_to receive(:validate)
-
-        add_query
-      end
-
-      it 'creates a class method by_id on object' do
-        add_query
-
-        expect(object).to respond_to(:by_id)
-      end
-    end
+    it_behaves_like 'common class method creation'
   end
 
   describe '.add_raw_query' do
@@ -86,12 +94,7 @@ describe GraphqlConnector::ServiceClassable::Queryable do
     let(:params) { [:id] }
     let(:raw_graphql_query) { 'query { currency { id } }' }
 
-    it 'validates class method on object' do
-      expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
-        .to receive(:validate_class_method).with(:by_id, object)
-
-      add_raw_query
-    end
+    it_behaves_like 'runs common validations'
 
     it 'validates query type' do
       expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
@@ -101,34 +104,6 @@ describe GraphqlConnector::ServiceClassable::Queryable do
       add_raw_query
     end
 
-    it 'validates params' do
-      expect(GraphqlConnector::ServiceClassable::ParamsValidator)
-        .to receive(:validate).with(params)
-
-      add_raw_query
-    end
-
-    it 'creates a class method by_id(id:) on object' do
-      add_raw_query
-
-      expect(object).to respond_to(:by_id).with_keywords(:id)
-    end
-
-    context 'without params' do
-      let(:params) { [] }
-
-      it 'does not validate params' do
-        expect(GraphqlConnector::ServiceClassable::ParamsValidator)
-          .not_to receive(:validate)
-
-        add_raw_query
-      end
-
-      it 'creates a class method by_id on object' do
-        add_raw_query
-
-        expect(object).to respond_to(:by_id)
-      end
-    end
+    it_behaves_like 'common class method creation'
   end
 end

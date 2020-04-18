@@ -117,8 +117,8 @@ class Product
             params: :id,
             returns: [:name, product_category: [:id, :name]]
 
-  add_query by_names: 'product_all',
-            params: => 'names',
+  add_query by_names: :product_all,
+            params: :names,
             returns: [:id, :name, product_category: [:id, :name]]
 
   add_query by: :product_all,

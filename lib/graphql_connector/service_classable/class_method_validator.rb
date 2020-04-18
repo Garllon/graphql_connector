@@ -2,19 +2,28 @@
 
 module GraphqlConnector
   module ServiceClassable
-    class InvalidClassMethodError < StandardError; end
+    class ClassMethodAlreadyImplementedError < StandardError; end
+    class InvalidClassTypeError < StandardError; end
     # Checks whether a class method for a specific graphql query is in an
     # expected format
     class ClassMethodValidator
       class << self
-        def validate(class_method_name, query_type)
-          return if [String, Symbol].member?(class_method_name.class) &&
-                    [String, Symbol].member?(query_type.class)
+        def validate_class_method(class_method_name, invoked_class)
+          return unless invoked_class.singleton_methods
+                                     .map(&:to_s)
+                                     .include?(class_method_name.to_s)
 
-          raise InvalidClassMethodError,
-                "Please ensure that #{class_method_name} #{query_type} has "\
-                'the following format => <method_alias>: ' \
-                '<graphql query or type> (e.g. all: :all_products)'
+          error_msg = "The (raw_)add_query '#{class_method_name}: ... ' is "\
+                      'already implemented within the context of '\
+                      "#{invoked_class} and therefore cannot be used!"
+          raise ClassMethodAlreadyImplementedError, error_msg
+        end
+
+        def validate_element_class_type(element, class_types)
+          return if element.class == class_types
+
+          raise InvalidClassTypeError, "Please ensure that #{element} is a"\
+                                       "#{class_types}!"
         end
       end
     end

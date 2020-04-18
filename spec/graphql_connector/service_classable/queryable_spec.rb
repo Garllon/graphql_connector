@@ -3,166 +3,132 @@
 require 'spec_helper'
 
 describe GraphqlConnector::ServiceClassable::Queryable do
-  let!(:car) do
-    class Car
+  let(:object) do
+    class Currency
       extend GraphqlConnector::ServiceClassable::Queryable
-
-      add_query all_cars: :cars_all, returns: %i[id name]
-      add_query by_id_name: :cars_by_params,
-                params: %i[id name],
-                returns: %i[id name]
-      add_raw_query raw: 'query { cars { id, name } }'
-      add_raw_query raw_by_id_name: 'query cars($id: !ID, $name: !String) '\
-                                    '{ cars(id: $id, name: $name) }',
-                    params: %i[id name]
     end
-  end
-  let(:car_client) do
-    instance_double(GraphqlConnector::HttpClient,
-                    raw_query: raw_response_car,
-                    query: open_struct_response_car)
-  end
-  let(:raw_response_car) { [{ id: '1', name: 'Audi' }] }
-  let(:open_struct_response_car) do
-    raw_response_car.map { |entry| OpenStruct.new(entry) }
   end
 
   before do
-    allow(Car).to receive(:http_client) { car_client }
+    object
   end
 
   after do
-    Object.send :remove_const, 'Car'
+    Object.send :remove_const, object.to_s
   end
 
-  it 'creates for each query a class method ' do
-    expect(Car.methods)
-      .to include(:all_cars, :by_id_name, :raw, :raw_by_id_name)
-  end
+  describe '.add_query' do
+    subject(:add_query) do
+      object.add_query(by_id: graphql_type,
+                       params: params,
+                       returns: return_fields)
+    end
+    let(:graphql_type) { :products }
+    let(:params) { [:id] }
+    let(:return_fields) { [:id, :name, catgeory: [:id]] }
 
-  describe '.all_cars' do
-    subject(:all_cars) { Car.all_cars }
+    it 'validates return fields' do
+      expect(GraphqlConnector::ServiceClassable::ReturnFieldsValidator)
+        .to receive(:validate).with(return_fields)
 
-    it 'forwards params to http_client' do
-      expect(car_client).to receive(:query).with(:cars_all, {}, %i[id name])
-
-      all_cars
+      add_query
     end
 
-    it { is_expected.to eq(open_struct_response_car) }
-  end
+    it 'validates class method on object' do
+      expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
+        .to receive(:validate_class_method).with(:by_id, object)
 
-  describe '.by_id_name' do
-    subject(:by_id_name) { Car.by_id_name(id: '1', name: 'Audi') }
-
-    it 'forwards params to http_client' do
-      expect(car_client)
-        .to receive(:query)
-        .with('cars_by_params', { id: '1', name: 'Audi' }, %i[id name])
-
-      by_id_name
+      add_query
     end
 
-    it { is_expected.to eq(open_struct_response_car) }
-  end
+    it 'validates query type' do
+      expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
+        .to receive(:validate_element_class_type).with(graphql_type, Symbol)
 
-  describe '.raw' do
-    subject(:raw) { Car.raw }
-
-    it 'forwards params to http_client' do
-      expect(car_client)
-        .to receive(:raw_query).with('query { cars { id, name } }')
-
-      raw
+      add_query
     end
 
-    it { is_expected.to eq(raw_response_car) }
-  end
+    it 'validates params' do
+      expect(GraphqlConnector::ServiceClassable::ParamsValidator)
+        .to receive(:validate).with(params)
 
-  describe '.raw_by_id_name' do
-    subject(:raw) { Car.raw_by_id_name(id: '1', name: 'Audi') }
-
-    it 'forwards params to http_client' do
-      expect(car_client)
-        .to receive(:raw_query)
-        .with('query cars($id: !ID, $name: !String) '\
-              '{ cars(id: $id, name: $name) }',
-              variables: { id: '1', name: 'Audi' })
-
-      raw
+      add_query
     end
 
-    it { is_expected.to eq(raw_response_car) }
-  end
+    it 'creates a class method by_id(id:) on object' do
+      add_query
 
-  context 'with another service class' do
-    let!(:truck) do
-      class Truck
-        extend GraphqlConnector::ServiceClassable::Queryable
-
-        add_query all_trucks: :trucks_all, returns: [:truck_id, brand: :name]
-      end
-    end
-    let(:truck_client) do
-      instance_double(GraphqlConnector::HttpClient, raw_query: [], query: [])
+      expect(object).to respond_to(:by_id).with_keywords(:id)
     end
 
-    before do
-      allow(Truck).to receive(:http_client) { truck_client }
-    end
+    context 'without params' do
+      let(:params) { [] }
 
-    after do
-      Object.send :remove_const, 'Truck'
-    end
+      it 'does not validate params' do
+        expect(GraphqlConnector::ServiceClassable::ParamsValidator)
+          .not_to receive(:validate)
 
-    it 'creates for each query a class method ' do
-      expect(Truck.methods).to include(:all_trucks)
-    end
-
-    describe '.all_trucks' do
-      subject(:all_trucks) { Truck.all_trucks }
-
-      it 'forwards params to http_client' do
-        expect(truck_client)
-          .to receive(:query)
-          .with(:trucks_all, {}, [:truck_id, brand: :name])
-
-        all_trucks
+        add_query
       end
 
-      it { is_expected.to eq([]) }
+      it 'creates a class method by_id on object' do
+        add_query
+
+        expect(object).to respond_to(:by_id)
+      end
     end
   end
 
-  context 'with invalid build_params' do
-    let(:camper) do
-      class Camper2
-        extend GraphqlConnector::ServiceClassable::Queryable
+  describe '.add_raw_query' do
+    subject(:add_raw_query) do
+      object.add_raw_query(by_id: raw_graphql_query, params: params)
+    end
+    let(:params) { [:id] }
+    let(:raw_graphql_query) { 'query { currency { id } }' }
 
-        add_query all: Class, returns: [:id]
+    it 'validates class method on object' do
+      expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
+        .to receive(:validate_class_method).with(:by_id, object)
+
+      add_raw_query
+    end
+
+    it 'validates query type' do
+      expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
+        .to receive(:validate_element_class_type)
+        .with(raw_graphql_query, String)
+
+      add_raw_query
+    end
+
+    it 'validates params' do
+      expect(GraphqlConnector::ServiceClassable::ParamsValidator)
+        .to receive(:validate).with(params)
+
+      add_raw_query
+    end
+
+    it 'creates a class method by_id(id:) on object' do
+      add_raw_query
+
+      expect(object).to respond_to(:by_id).with_keywords(:id)
+    end
+
+    context 'without params' do
+      let(:params) { [] }
+
+      it 'does not validate params' do
+        expect(GraphqlConnector::ServiceClassable::ParamsValidator)
+          .not_to receive(:validate)
+
+        add_raw_query
       end
-    end
-    let(:invalid_class_method_error) do
-      GraphqlConnector::ServiceClassable::InvalidClassMethodError
-    end
 
-    it 'raises an InvalidClassMethodError' do
-      expect { camper }.to raise_error(invalid_class_method_error)
-    end
-  end
+      it 'creates a class method by_id on object' do
+        add_raw_query
 
-  context 'with invalid params' do
-    let(:camper) do
-      class Camper3
-        extend GraphqlConnector::ServiceClassable::Queryable
-
-        add_query all: :all_campers, params: [Class], returns: [:id]
+        expect(object).to respond_to(:by_id)
       end
-    end
-
-    it 'raises an InvalidParamsError' do
-      expect { camper }
-        .to raise_error(GraphqlConnector::ServiceClassable::InvalidParamsError)
     end
   end
 end

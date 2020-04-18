@@ -9,11 +9,12 @@ module GraphqlConnector
                       [var, binding.local_variable_get(var)]
                     end.to_h'
 
-      def add_query(params: [], returns:, **build_params)
-        class_method_name = build_params.first[0]
-        query_type = build_params.first[1]
+      def add_query(params: [], returns:, **method_to_query)
+        class_method_name = method_to_query.first[0]
+        query_type = method_to_query.first[1]
         ReturnFieldsValidator.validate(returns)
-        ClassMethodValidator.validate(class_method_name, query_type)
+        ClassMethodValidator.validate_class_method(class_method_name, self)
+        ClassMethodValidator.validate_element_class_type(query_type, Symbol)
 
         if params.empty?
           return query_method(class_method_name, query_type, returns)
@@ -23,10 +24,11 @@ module GraphqlConnector
         query_keyword_method(class_method_name, query_type, params, returns)
       end
 
-      def add_raw_query(params: [], **build_params)
-        class_method_name = build_params.first[0]
-        query_string = build_params.first[1]
-        ClassMethodValidator.validate(class_method_name, query_string)
+      def add_raw_query(params: [], **method_to_raw_query)
+        class_method_name = method_to_raw_query.first[0]
+        query_string = method_to_raw_query.first[1]
+        ClassMethodValidator.validate_class_method(class_method_name, self)
+        ClassMethodValidator.validate_element_class_type(query_string, String)
 
         if params.empty?
           return raw_query_method(class_method_name, query_string)

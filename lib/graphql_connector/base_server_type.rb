@@ -63,7 +63,7 @@ module GraphqlConnector
           end
 
           def raw_query(query_string, variables: {})
-            http_client.raw_query(query_string, variables)
+            http_client.raw_query(query_string, variables: variables)
           end
         end
       end

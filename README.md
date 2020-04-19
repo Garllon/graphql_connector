@@ -40,9 +40,9 @@ For each graphql server you wish to query use `add_server`.
 Afterwards you will have the following options to fetch and/or mutate data with
 one or many graphql servers:
 
-* `raw_query`
-* `query`
-* `service class inclusion`
+* `raw_query` --> [Examples](examples/raw_query_examples.rb)
+* `query` --> [Examples](examples/query_examples.rb)
+* `service class inclusion` --> [Examples](examples/departments_service_class_examples.rb)
 
 See the following sub sections for details
 
@@ -54,6 +54,8 @@ GraphqlConnector::<name>.raw_query(query_string)
 ```
 
 Note that `<name>` has to be replaced by any of the ones added via `add_server`
+
+See also [here](examples/raw_query_examples.rb) for example usage
 
 ---
 ### query
@@ -73,6 +75,8 @@ GraphqlConnector::<name>.query(model, condition, selected_fields)
 > You get an OpenStruct back. Currently only the first level attributes are
 > supported with OpenStruct, associated objects are still a normal array of
 > hashes.
+
+See also [here](examples/query_examples.rb) for example usage
 
 #### selected_fields
 
@@ -99,7 +103,7 @@ so that it has re-usable graphql query methods.
   * `add_raw_query <alias>: <query string>, params: [<any kind of query type params>]`
   * If <query type>/<query string> does not need them, omit `params`
 
-Examples:
+See also [here](examples/departments_service_class_examples.rb) for example usage as also in the following:
 
 ```ruby
 GraphqlConnector.configure do |config|
@@ -110,22 +114,22 @@ end
 class Product
   extend GraphqlConnector::Foo::Query
 
-  add_query all: :products_all,
+  add_query all: :products,
             returns: [:id, :name]
 
-  add_query by_id: :products_all,
+  add_query by_id: :products,
             params: :id,
             returns: [:name, product_category: [:id, :name]]
 
-  add_query by_names: :product_all,
+  add_query by_names: :products,
             params: :names,
             returns: [:id, :name, product_category: [:id, :name]]
 
-  add_query by: :product_all,
+  add_query by: :products,
             params: [:id, :name],
             returns: [:name]
 
-  add_query by_category_id: :product_all,
+  add_query by_category_id: :products,
             params: :product_category,
             returns: [product_category: [:id, :name]]
 end
@@ -152,7 +156,7 @@ Also custom **class methods** can used to call any kind of `query` and do furthe
 class Product
   extend GraphqlConnector::Foo::Query
 
-  add_query all: :products_all, returns: [:name]
+  add_query all: :products, returns: [:name]
 
   def self.by_id(id:)
     all.select { |products| products.id == id }.first

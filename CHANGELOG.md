@@ -1,4 +1,4 @@
-## 1.1.0 (2020-2-8)
+## 1.1.0 (2020-4-19)
 
 ### Features
 * Allow building graphql querying in custom classes via `service class inclusion`

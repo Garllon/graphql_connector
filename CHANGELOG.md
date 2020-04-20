@@ -1,3 +1,12 @@
+## 1.1.0 (2020-4-19)
+
+### Features
+* Allow building graphql querying in custom classes via `service class inclusion`
+* See `README` for details about `service class inclusion`
+
+### BugFix
+* Forward `variables` when performing a `raw_query`
+
 ## 1.0.0 (2020-1-26)
 
 ### Breaking

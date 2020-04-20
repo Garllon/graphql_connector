@@ -5,6 +5,10 @@ require 'graphql_connector/query_builder'
 require 'graphql_connector/configuration'
 require 'graphql_connector/http_client'
 require 'graphql_connector/base_server_type'
+require 'graphql_connector/service_classable/class_method_validator'
+require 'graphql_connector/service_classable/params_validator'
+require 'graphql_connector/service_classable/return_fields_validator'
+require 'graphql_connector/service_classable/queryable'
 require 'graphql_connector/custom_attribute_error'
 require 'httparty'
 
@@ -21,7 +25,7 @@ module GraphqlConnector
   end
 
   def self.reset
-    @configuration = Configuration.new
+    @configuration.reset!
   end
 
   def self.configure

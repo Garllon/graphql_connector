@@ -48,5 +48,12 @@ describe GraphqlConnector::Configuration do
         .from(true)
         .to(false)
     end
+
+    it 'removes service class inclusion Query' do
+      expect { reset! }
+        .to change { GraphqlConnector.const_defined?('Foo::Query') }
+        .from(true)
+        .to(false)
+    end
   end
 end

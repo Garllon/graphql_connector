@@ -7,12 +7,13 @@ require 'graphql_connector/version'
 Gem::Specification.new do |spec|
   spec.name          = 'graphql_connector'
   spec.version       = GraphqlConnector::VERSION
-  spec.authors       = ['Garllon']
-  spec.email         = ['palluthe.bennet@gmail.com']
+  spec.authors       = %w[Garllon sushie1984]
+  spec.email         = ['palluthe.bennet@gmail.com', 'sascha_burku@yahoo.de']
 
-  spec.summary       = 'Simple GraphQL client'
-  spec.description   = 'Simple grahql client to query with your own raw string'\
-                       ' or with the small helper method query.'
+  spec.summary       = 'GraphQL client'
+  spec.description   = 'Grahql client to query with your own raw string, '\
+                       'with the small helper method query or with service '\
+                       'class inclusion.'
   spec.homepage      = 'https://github.com/Garllon/graphql_connector/blob/master/README.md'
   spec.license       = 'MIT'
 

@@ -29,6 +29,19 @@ describe GraphqlConnector::BaseServerType do
       expect(GraphqlConnector::Foo).to respond_to(:raw_query)
     end
 
+    it 'creates a service class module' do
+      expect { build }
+        .to change { Object.const_defined?('GraphqlConnector::Foo::Query') }
+        .from(false)
+        .to(true)
+    end
+
+    it 'created service class module has extension injection' do
+      build
+
+      expect(GraphqlConnector::Foo::Query).to respond_to(:extended)
+    end
+
     context 'when using name again' do
       let(:another_build) do
         type.build(name, 'http://bar.com/graphql', {})

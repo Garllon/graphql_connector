@@ -41,6 +41,7 @@ one or many graphql servers:
 
 * `raw_query` --> [Examples](examples/raw_query_examples.rb)
 * `query` --> [Examples](examples/query_examples.rb)
+* `mutation` --> [Examples](examples/mutation_examples.rb)
 * `service class inclusion` --> [Examples](examples/departments_service_class_examples.rb)
 
 See the following sub sections for details
@@ -91,18 +92,31 @@ Example:
 
 ---
 
+### mutation
+
+Works in the same way as [query](#query)
+
+See also [here](examples/mutation_examples.rb) for example usage
+
 ### Service class inclusion
 
 This approach can be used to `graphqlize` **any** kind of ruby (service) class
-so that it has re-usable graphql query methods.
+so that it has re-usable graphql `query` and `mutation` **class methods**.
 
 * First add `extend GraphqlConnector::<server>::Query` in the the class(es) that should be `graphqlized`
-* Next for each mapping add a `add_query` or `add_raw_query` aliasing the graphql server type supports as follows:
-  * `add_query <alias>: <query type in graphql server>, params: [<any kind of query type params>], returns: [<selected_fields>]`
-  * `add_raw_query <alias>: <query string>, params: [<any kind of query type params>]`
-  * If <query type>/<query string> does not need them, omit `params`
 
-See also [here](examples/departments_service_class_examples.rb) for example usage as also in the following:
+* Then you can aliases as many graphql server types via `add_query` and/or `add_raw_query` and/or `add_mutation`:
+
+```ruby
+add_query <alias>: :<graphql_server_type>, params: [...], returns: [...]
+
+add_raw_query <alias>: 'query { ... }', params: [...]
+
+add_mutation <alias>: :<graphql_server_type>, params: [...], returns: [...]
+```
+* :grey_exclamation: If not needed omit `params`
+
+See also [here](examples/departments_service_class_examples.rb) and also here for complete example usage:
 
 ```ruby
 GraphqlConnector.configure do |config|
@@ -131,6 +145,10 @@ class Product
   add_query by_category_id: :products,
             params: :product_category,
             returns: [product_category: [:id, :name]]
+
+  add_mutation create: :createProduct,
+               params: [:name, :catgetoryId],
+               returns: [:id, :name]
 end
 
 Product.all
@@ -147,6 +165,9 @@ Product.by(id: 1, name: 'Demo Product')
 
 Product.by_category_id(product_category: { id: 10})
 => OpenStruct<product_category=<ProductCategory<id=10, name='Demo Category'>>
+
+Product.create(name: 'Another Product', catgetoryId: 10)
+=> OpenStruct<id=10, name='Another Product'>
 ```
 
 Also custom **class methods** can used to call any kind of `query` and do further selection instead:
@@ -165,6 +186,9 @@ end
 Product.by_id(id: 1)
 => OpenStruct<id=1, name='Demo Product'>>
 ```
+
+:warning: Ensure that your custom **class method** never has the **same name** as an `<alias>` of `add_query`, `add_raw_query` or `add_mutation`. Otherwise the associated grapqhl query will not be performed because of [Ruby Open Class principle](https://ruby-lang.co/ruby-open-class/)
+
 
 Example for `raw_query`:
 
@@ -186,6 +210,8 @@ Product.by(id: '1', name: 'Demo Product')
 => { id: '1', name: 'Demo Product' }
 
 ```
+
+:exclamation: There is no `add_raw_mutation` since `add_raw_query` does already cover such a case
 
 ## Development
 

@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# ! The following examples are used together with
+# ! https://github.com/sushie1984/rails-graphql-server
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 uri = 'http://rails-graphql-server.herokuapp.com/api/graphql'
 GraphqlConnector.configure do |config|
   config.add_server(name: 'RailsGraphqlServer', uri: uri, headers: {})
@@ -27,6 +32,12 @@ class Department
                               }
                             }',
                 params: [:id]
+
+  # We use a nested 'input' as of convention for
+  # https://github.com/sushie1984/rails-graphql-server/blob/master/app/graphql/input_objects/department_attributes.rb
+  add_mutation create: :createDepartment,
+               params: :input,
+               returns: [department: %i[id name location]]
 end
 
 Department.all
@@ -36,3 +47,5 @@ Department.by_id(id: %w[1 2])
 Department.all_raw
 
 Department.by_id_raw(id: %w[1 2])
+
+Department.create(input: { attributes: { name: 'One', location: 'Berlin' } })

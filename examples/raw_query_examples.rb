@@ -1,5 +1,10 @@
 # frozen_string_literal: true
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# ! The following examples are used together with
+# ! https://github.com/sushie1984/rails-graphql-server
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 GraphqlConnector.configure do |config|
   config.add_server(name: 'RailsGraphqlServer',
                     uri: 'http://rails-graphql-server.herokuapp.com/api/graphql',

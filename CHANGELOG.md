@@ -1,3 +1,9 @@
+## 1.2.0 (2020-12-22)
+
+### Features
+* Add `mutation` under server namespace and service class inclusion
+* See `README` for details
+
 ## 1.1.1 (2020-5-04)
 
 ### BugFix

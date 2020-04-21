@@ -3,22 +3,27 @@
 module GraphqlConnector
   # create the graphql query_string out of the given attributes.
   class QueryBuilder
-    def initialize(model, conditions, selected_fields)
+    def initialize(type, model, inputs, selected_fields)
+      @type             = type
       @model            = model
-      @conditions       = conditions
+      @inputs           = inputs
       @selected_fields  = selected_fields
     end
 
     def create
-      "query { #{main_filter} { #{parse_fields(@selected_fields)} } }"
+      <<-STRING
+      #{@type} {
+        #{@model}#{main_filter} {
+          #{parse_fields(@selected_fields)}
+        }
+      }
+      STRING
     end
 
     private
 
     def main_filter
-      conditions = @conditions.each_with_object([]) do |(key, value), array|
-        next if value.is_a? Hash # will be processed in #field_with_filter
-
+      conditions = @inputs.each_with_object([]) do |(key, value), array|
         array << "#{key}: #{value_as_parameter(value)}"
       end
 
@@ -29,11 +34,21 @@ module GraphqlConnector
 
     def value_as_parameter(value)
       case value
-      when TrueClass, FalseClass, Integer, Float
-        value
       when Array
         casted_values = value.map { |v| value_as_parameter(v) }
         "[#{casted_values.join(',')}]"
+      when Hash
+        casted_values = value.map { |k, v| "#{k}: #{value_as_parameter(v)}" }
+        "{#{casted_values.join(',')}}"
+      else
+        scalar_types(value)
+      end
+    end
+
+    def scalar_types(value)
+      case value
+      when TrueClass, FalseClass, Integer, Float
+        value
       else # fallback to string
         '"' + value.to_s + '"'
       end

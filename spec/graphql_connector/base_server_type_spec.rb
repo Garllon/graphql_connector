@@ -29,6 +29,12 @@ describe GraphqlConnector::BaseServerType do
       expect(GraphqlConnector::Foo).to respond_to(:raw_query)
     end
 
+    it 'injects mutation method of http_client' do
+      build
+
+      expect(GraphqlConnector::Foo).to respond_to(:mutation)
+    end
+
     it 'creates a service class module' do
       expect { build }
         .to change { Object.const_defined?('GraphqlConnector::Foo::Query') }

@@ -15,12 +15,16 @@ describe 'various service class inclusion cases' do
       add_raw_query raw_by_id_name: 'query cars($id: !ID, $name: !String) '\
                                     '{ cars(id: $id, name: $name) }',
                     params: %i[id name]
+      add_mutation create: :create_car,
+                   params: %i[name type],
+                   returns: %i[id name]
     end
   end
   let(:car_client) do
     instance_double(GraphqlConnector::HttpClient,
                     raw_query: raw_response_car,
-                    query: open_struct_response_car)
+                    query: open_struct_response_car,
+                    mutation: open_struct_response_car)
   end
   let(:raw_response_car) { [{ id: '1', name: 'Audi' }] }
   let(:open_struct_response_car) do
@@ -35,13 +39,9 @@ describe 'various service class inclusion cases' do
     Object.send :remove_const, 'Car'
   end
 
-  it 'creates for each query a class method ' do
+  it 'creates for each add method a class method ' do
     expect(Car.methods)
-      .to include(:all_cars, :by_id_name, :raw, :raw_by_id_name)
-  end
-
-  describe '.add_query' do
-    subject(:add_query) {}
+      .to include(:all_cars, :by_id_name, :raw, :raw_by_id_name, :create)
   end
 
   describe '.all_cars' do
@@ -97,6 +97,20 @@ describe 'various service class inclusion cases' do
     end
 
     it { is_expected.to eq(raw_response_car) }
+  end
+
+  describe '.create' do
+    subject(:create) { Car.create(name: 'Audi', type: 'Koachn') }
+
+    it 'forwards params to http_client' do
+      expect(car_client)
+        .to receive(:mutation)
+        .with('create_car', { name: 'Audi', type: 'Koachn' }, %i[id name])
+
+      create
+    end
+
+    it { is_expected.to eq(open_struct_response_car) }
   end
 
   context 'with another service class' do

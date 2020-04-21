@@ -21,7 +21,7 @@ describe GraphqlConnector::HttpClient do
 
     it 'forwards params to query builder' do
       expect(GraphqlConnector::QueryBuilder)
-        .to receive(:new).with(model, conditions, selected_fields)
+        .to receive(:new).with('query', model, conditions, selected_fields)
                          .and_call_original
 
       query
@@ -50,7 +50,7 @@ describe GraphqlConnector::HttpClient do
     end
   end
 
-  describe 'raw_query' do
+  describe '#raw_query' do
     subject(:raw_query) { client.raw_query(query_string) }
     let(:query_string) { 'query { cars(name: "audi") { name } }' }
 
@@ -91,6 +91,43 @@ describe GraphqlConnector::HttpClient do
 
       it 'raises a CustomAttributeError' do
         expect { raw_query }.to raise_error(CustomAttributeError)
+      end
+    end
+  end
+
+  describe '#mutation' do
+    subject(:query) { client.mutation(model, inputs, selected_fields) }
+    let(:model) { 'cars' }
+    let(:inputs) { { 'name' => 'Audi' } }
+    let(:selected_fields) { ['name'] }
+
+    it 'forwards params to query builder' do
+      expect(GraphqlConnector::QueryBuilder)
+        .to receive(:new).with('mutation', model, inputs, selected_fields)
+                         .and_call_original
+
+      query
+    end
+
+    it 'resolves query_string via raw_query' do
+      expect(client).to receive(:raw_query).with(String).and_call_original
+
+      query
+    end
+
+    it { is_expected.to contain_exactly(OpenStruct) }
+
+    it 'responds with correct value for name' do
+      expect(query.first.name).to eq('Audi')
+    end
+
+    context 'when response with a single element' do
+      let(:body) { { data: { cars: { name: 'Audi' } } }.to_json }
+
+      it { is_expected.to be_a(OpenStruct) }
+
+      it 'responds with correct value for name' do
+        expect(query.name).to eq('Audi')
       end
     end
   end

@@ -19,9 +19,9 @@ describe GraphqlConnector::HttpClient do
     let(:conditions) { { 'name' => 'Audi' } }
     let(:selected_fields) { ['name'] }
 
-    it 'forwards params to query builder' do
-      expect(GraphqlConnector::QueryBuilder)
-        .to receive(:new).with('query', model, conditions, selected_fields)
+    it 'forwards params to query formatter' do
+      expect(GraphqlConnector::Formatters::QueryFormat)
+        .to receive(:new).with(model, conditions, selected_fields)
                          .and_call_original
 
       query
@@ -101,9 +101,9 @@ describe GraphqlConnector::HttpClient do
     let(:inputs) { { 'name' => 'Audi' } }
     let(:selected_fields) { ['name'] }
 
-    it 'forwards params to query builder' do
-      expect(GraphqlConnector::QueryBuilder)
-        .to receive(:new).with('mutation', model, inputs, selected_fields)
+    it 'forwards params to mutation formatter' do
+      expect(GraphqlConnector::Formatters::MutationFormat)
+        .to receive(:new).with(model, inputs, selected_fields)
                          .and_call_original
 
       query

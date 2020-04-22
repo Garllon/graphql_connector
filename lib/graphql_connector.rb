@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 require 'graphql_connector/version'
-require 'graphql_connector/query_builder'
+require 'graphql_connector/formatters/selected_fields'
+require 'graphql_connector/formatters/query_format'
+require 'graphql_connector/formatters/mutation_format'
 require 'graphql_connector/configuration'
 require 'graphql_connector/http_client'
 require 'graphql_connector/base_server_type'

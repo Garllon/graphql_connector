@@ -9,11 +9,17 @@ module GraphqlConnector
     end
 
     def query(model, conditions, selected_fields)
-      result_for('query', model, conditions, selected_fields)
+      query_string =
+        Formatters::QueryFormat.new(model, conditions, selected_fields).create
+      parsed_body = raw_query(query_string)
+      format_body(parsed_body['data'][model.to_s])
     end
 
     def mutation(model, inputs, selected_fields)
-      result_for('mutation', model, inputs, selected_fields)
+      query_string =
+        Formatters::MutationFormat.new(model, inputs, selected_fields).create
+      parsed_body = raw_query(query_string)
+      format_body(parsed_body['data'][model.to_s])
     end
 
     def raw_query(query_string, variables: {})
@@ -28,14 +34,10 @@ module GraphqlConnector
 
     private
 
-    def result_for(type, model, inputs, selected_fields)
-      query_string =
-        QueryBuilder.new(type, model, inputs, selected_fields).create
-      parsed_body = raw_query(query_string)
-      result = parsed_body['data'][model.to_s]
-      return OpenStruct.new(result) unless result.is_a? Array
+    def format_body(response_body)
+      return OpenStruct.new(response_body) unless response_body.is_a? Array
 
-      result.map { |entry| OpenStruct.new(entry) }
+      response_body.map { |entry| OpenStruct.new(entry) }
     end
 
     def verify_response!(parsed_body)

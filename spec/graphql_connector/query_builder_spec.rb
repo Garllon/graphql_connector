@@ -13,5 +13,12 @@ module GraphqlConnector
     let(:expect_result) { 'query { product(id: 1) { id name } }' }
 
     it { is_expected.to eq(expect_result) }
+
+    context 'with empty conditions' do
+      let(:conditions) { {} }
+      let(:expect_result) { 'query { product { id name } }' }
+
+      it { is_expected.to eq(expect_result) }
+    end
   end
 end

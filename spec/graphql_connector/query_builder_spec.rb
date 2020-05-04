@@ -12,8 +12,6 @@ module GraphqlConnector
 
     let(:expect_result) { 'query { product(id: 1) { id name } }' }
 
-    it 'returns a valid graphql query string' do
-      subject.equal? expect_result
-    end
+    it { is_expected.to eq(expect_result) }
   end
 end

@@ -1,11 +1,13 @@
-name: RSpec
+name: CI
+
 on: [push]
+
 jobs: 
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['2.4.10', '2.5.8', '2.6.6', '2.7.2']
+        ruby: ['2.4.x', '2.5.x', '2.6.x', '2.7.x']
     name: "ruby ${{ matrix.ruby }}"
     steps:
       - uses: actions/checkout@v1
@@ -18,3 +20,18 @@ jobs:
           bundle install
       - name: Run Test with rspec
         run: bundle exec rspec spec
+  rubocop:
+    name: Rubocop
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-ruby@v1
+      with:
+        ruby-version: 2.7.x
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle install
+    - name: Build and test
+      run: |
+        bundle exec rubocop

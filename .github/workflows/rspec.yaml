@@ -1,0 +1,20 @@
+name: RSpec
+on: [push]
+jobs: 
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby: ['2.4.10', '2.5.8', '2.6.6', '2.7.2']
+    name: "ruby ${{ matrix.ruby }}"
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install
+      - name: Run Test with rspec
+        run: bundle exec rspec spec

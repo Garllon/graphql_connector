@@ -1,3 +1,8 @@
+## 1.1.1 (2020-5-04)
+
+### BugFix
+* Omit invalid `()` for empty conditions in `query` method
+
 ## 1.1.0 (2020-4-19)
 
 ### Features

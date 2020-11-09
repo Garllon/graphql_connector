@@ -3,7 +3,7 @@
 
 [![Gem
 Version](https://badge.fury.io/rb/graphql_connector.svg)](https://badge.fury.io/rb/graphql_connector)
-[![RSpec](https://github.com/Garllon/graphql_connector/workflows/RSpec/badge.svg)](https://github.com/Garllon/graphql_connector/actions?query=workflow%3ACI)
+[![CI](https://github.com/Garllon/graphql_connector/workflows/CI/badge.svg)](https://github.com/Garllon/graphql_connector/actions?query=workflow%3ACI)
 [![Maintainability](https://api.codeclimate.com/v1/badges/548db3cf0d078b379c84/maintainability)](https://codeclimate.com/github/Garllon/graphql_connector/maintainability)
 
 An easy connector to call your `graphql` server. Currently there is no schema

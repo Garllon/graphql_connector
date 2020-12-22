@@ -29,6 +29,8 @@ module GraphqlConnector
           array << "#{key}: #{value_as_parameter(value)}"
         end
 
+        return '' if inputs.empty?
+
         "(#{inputs.join(', ')})"
       end
 

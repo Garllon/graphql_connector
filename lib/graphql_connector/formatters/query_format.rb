@@ -31,6 +31,8 @@ module GraphqlConnector
           array << "#{key}: #{value_as_parameter(value)}"
         end
 
+        return '' if conditions.empty?
+
         "(#{conditions.join(', ')})"
       end
 

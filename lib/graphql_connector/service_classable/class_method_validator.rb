@@ -13,9 +13,9 @@ module GraphqlConnector
                                      .map(&:to_s)
                                      .include?(class_method_name.to_s)
 
-          error_msg = "The (raw_)add_query '#{class_method_name}: ... ' is "\
+          error_msg = "The method '#{class_method_name}: ... ' is "\
                       'already implemented within the context of '\
-                      "#{invoked_class} and therefore cannot be used!"
+                      "#{invoked_class} and therefore cannot be used again!"
           raise ClassMethodAlreadyImplementedError, error_msg
         end
 

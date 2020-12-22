@@ -18,6 +18,24 @@ shared_examples 'runs common validations' do
   end
 end
 
+shared_examples 'runs return_fields validation' do
+  it 'validates return fields' do
+    expect(GraphqlConnector::ServiceClassable::ReturnFieldsValidator)
+      .to receive(:validate).with(return_fields)
+
+    subject
+  end
+end
+
+shared_examples 'runs Symbol query_type validation' do
+  it 'validates query type' do
+    expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
+      .to receive(:validate_element_class_type).with(graphql_type, Symbol)
+
+    subject
+  end
+end
+
 shared_examples 'common class method creation' do
   it 'creates a class method by_id(id:) on object' do
     subject
@@ -68,21 +86,11 @@ describe GraphqlConnector::ServiceClassable::Queryable do
     let(:params) { [:id] }
     let(:return_fields) { [:id, :name, catgeory: [:id]] }
 
-    it 'validates return fields' do
-      expect(GraphqlConnector::ServiceClassable::ReturnFieldsValidator)
-        .to receive(:validate).with(return_fields)
-
-      add_query
-    end
+    it_behaves_like 'runs return_fields validation'
 
     it_behaves_like 'runs common validations'
 
-    it 'validates query type' do
-      expect(GraphqlConnector::ServiceClassable::ClassMethodValidator)
-        .to receive(:validate_element_class_type).with(graphql_type, Symbol)
-
-      add_query
-    end
+    it_behaves_like 'runs Symbol query_type validation'
 
     it_behaves_like 'common class method creation'
   end
@@ -103,6 +111,25 @@ describe GraphqlConnector::ServiceClassable::Queryable do
 
       add_raw_query
     end
+
+    it_behaves_like 'common class method creation'
+  end
+
+  describe '.add_mutation' do
+    subject(:add_mutation) do
+      object.add_mutation(by_id: graphql_type,
+                          params: params,
+                          returns: return_fields)
+    end
+    let(:graphql_type) { :products }
+    let(:params) { [:id] }
+    let(:return_fields) { [:id, :name, catgeory: [:id]] }
+
+    it_behaves_like 'runs return_fields validation'
+
+    it_behaves_like 'runs common validations'
+
+    it_behaves_like 'runs Symbol query_type validation'
 
     it_behaves_like 'common class method creation'
   end

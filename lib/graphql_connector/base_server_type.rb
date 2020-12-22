@@ -49,7 +49,6 @@ module GraphqlConnector
 
       def inject_http_client_delegations(base_object)
         base_object.instance_eval do
-          require 'forwardable'
           extend SingleForwardable
           def_delegators :http_client, :query, :raw_query, :mutation
 

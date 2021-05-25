@@ -1,6 +1,6 @@
-## Unreleased
+## 1.2.1 (2021-05-25)
 
-* relax httparty dependency
+* relax httparty dependency(`~> 0.17` => `~> 0.16`)
 
 ## 1.2.0 (2020-12-22)
 

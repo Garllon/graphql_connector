@@ -1,3 +1,7 @@
+## Unreleased
+
+* relax httparty dependency
+
 ## 1.2.0 (2020-12-22)
 
 ### Features

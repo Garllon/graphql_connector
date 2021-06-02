@@ -16,10 +16,13 @@ describe GraphqlConnector::Configuration do
     let(:name) { 'Foo' }
     let(:uri) { 'http://foo.com' }
     let(:headers) { {} }
+    let(:connector) { {} }
 
     it 'forwards params to BaseServerType build' do
       expect(GraphqlConnector::BaseServerType)
-        .to receive(:build).with(name, uri, headers).and_call_original
+        .to receive(:build)
+        .with(name, uri, headers, connector)
+        .and_call_original
 
       add_server
     end

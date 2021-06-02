@@ -30,9 +30,22 @@ Or install it yourself as:
 You need to configure the `graphql_connector` first:
 ``` ruby
 GraphqlConnector.configure do |config|
-  config.add_server(name: 'Foo', uri: 'http://foo.com/api/graphql', headers: {})
+  config.add_server(name: 'Foo', uri: 'http://foo.com/api/graphql', headers: {}, connector: {})
 end
 ```
+
+The connector is expecting that it contains a `base` connector instance and a
+`method` parameter as string, where it gets the token. Currently like this:
+```ruby
+{ base: TokenAgent.new, method: 'get_authorization_header' }
+```
+
+Your method should return a hash like this:
+```ruby
+{ 'Authorization' => 'Token HERE' }
+
+When you set a connector, it will override the setting in the headers for
+Authorization.
 
 For each graphql server you wish to query use `add_server`.
 

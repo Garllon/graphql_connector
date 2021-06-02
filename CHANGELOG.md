@@ -1,3 +1,8 @@
+## 1.3.0 (2021-06-02)
+
+* add the option to use a connector instead of init header for authorization
+  part of headers 
+
 ## 1.2.1 (2021-05-25)
 
 * relax httparty dependency(`~> 0.17` => `~> 0.16`)

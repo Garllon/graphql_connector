@@ -3,9 +3,10 @@
 module GraphqlConnector
   # Wrapper class for HTTParty post query
   class HttpClient
-    def initialize(uri, headers)
+    def initialize(uri, headers, connector = {})
       @uri = uri
       @headers = headers
+      @connector = connector
     end
 
     def query(model, conditions, selected_fields)
@@ -24,7 +25,7 @@ module GraphqlConnector
 
     def raw_query(query_string, variables: {})
       response = HTTParty.post(@uri,
-                               headers: @headers,
+                               headers: handle_headers,
                                body: { query: query_string,
                                        variables: variables })
       parsed_body = JSON.parse(response.body)
@@ -33,6 +34,13 @@ module GraphqlConnector
     end
 
     private
+
+    def handle_headers
+      return @headers if @connector.empty?
+
+      @headers
+        .merge(@connector[:base].send(@connector[:method]))
+    end
 
     def format_body(response_body)
       return OpenStruct.new(response_body) unless response_body.is_a? Array

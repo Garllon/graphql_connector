@@ -35,14 +35,22 @@ end
 ```
 
 The connector is expecting that it contains a `base` connector instance and a
-`method` parameter as string, where it gets the token. Currently like this:
+`method` parameter as string, where it gets the token. WE expect that the
+method is a public method in your connector class. Currently like this:
 ```ruby
 { base: TokenAgent.new, method: 'get_authorization_header' }
 ```
 
 Your method should return a hash like this:
 ```ruby
-{ 'Authorization' => 'Token HERE' }
+class TokenAgent
+   [...]
+   def get_authorization_header
+      [...]
+      { 'Authorization' => 'Token HERE' }
+   end
+end
+```
 
 When you set a connector, it will override the setting in the headers for
 Authorization.

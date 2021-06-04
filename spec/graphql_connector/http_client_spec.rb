@@ -3,9 +3,10 @@
 require 'spec_helper'
 
 describe GraphqlConnector::HttpClient do
-  let(:client) { described_class.new(uri, headers) }
+  let(:client) { described_class.new(uri, headers, connector) }
   let(:uri) { 'http://foo.bar/graphql' }
   let(:headers) { { 'Authorization' => 'Bearer Test' } }
+  let(:connector) { {} }
   let(:body) { { data: { cars: [{ name: 'Audi' }] } }.to_json }
 
   before do
@@ -54,35 +55,55 @@ describe GraphqlConnector::HttpClient do
     subject(:raw_query) { client.raw_query(query_string) }
     let(:query_string) { 'query { cars(name: "audi") { name } }' }
 
-    it 'forwards params to HTTParty post' do
-      expect(HTTParty)
-        .to receive(:post)
-        .with(uri,
-              headers: headers,
-              body: { query: query_string, variables: {} })
+    context 'with connector' do
+      let(:headers) { {} }
+      let(:http_headers) { { 'Authorization' => 'Token' } }
+      let(:method_name) { 'get_token' }
+      let(:base) { OpenStruct.new(method_name => http_headers) }
+      let(:connector) { { base: base, method: method_name } }
 
-      raw_query
+      it 'forwards params to HTTParty post' do
+        expect(HTTParty)
+          .to receive(:post)
+          .with(uri,
+                headers: http_headers,
+                body: { query: query_string, variables: {} })
+
+        raw_query
+      end
     end
 
-    it { is_expected.to be_a(Hash) }
-
-    context 'with explicite variables' do
-      subject(:raw_query) do
-        client.raw_query(query_string, variables: variables)
-      end
-      let(:query_string) do
-        'query cars($name: String!) { cars(name: $String) { name } }'
-      end
-      let(:variables) { { name: 'audi' } }
-
-      it 'forwards params and variables to HTTParty post' do
+    context 'with headers params' do
+      it 'forwards params to HTTParty post' do
         expect(HTTParty)
           .to receive(:post)
           .with(uri,
                 headers: headers,
-                body: { query: query_string, variables: variables })
+                body: { query: query_string, variables: {} })
 
         raw_query
+      end
+
+      it { is_expected.to be_a(Hash) }
+
+      context 'with explicite variables' do
+        subject(:raw_query) do
+          client.raw_query(query_string, variables: variables)
+        end
+        let(:query_string) do
+          'query cars($name: String!) { cars(name: $String) { name } }'
+        end
+        let(:variables) { { name: 'audi' } }
+
+        it 'forwards params and variables to HTTParty post' do
+          expect(HTTParty)
+            .to receive(:post)
+            .with(uri,
+                  headers: headers,
+                  body: { query: query_string, variables: variables })
+
+          raw_query
+        end
       end
     end
 

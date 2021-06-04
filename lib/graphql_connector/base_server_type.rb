@@ -5,7 +5,7 @@ module GraphqlConnector
   # Class to wrap http_client calls under a specific namespaced class
   class BaseServerType
     class << self
-      def build(name, uri, headers, connector = {})
+      def build(name, uri, headers = {}, connector = {})
         verify_new_client_type_for!(name)
         base_class = class_with(uri, headers, connector)
         base_object = GraphqlConnector.const_set(name, base_class)
@@ -39,7 +39,7 @@ module GraphqlConnector
         METHOD
       end
 
-      def class_with(uri, headers, connector = {})
+      def class_with(uri, headers = {}, connector = {})
         Class.new do
           attr_accessor :uri, :headers, :connector
           @uri       = uri

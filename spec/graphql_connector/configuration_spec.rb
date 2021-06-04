@@ -9,6 +9,13 @@ describe GraphqlConnector::Configuration do
     config.reset!
   end
 
+  shared_examples 'Build BaseServerType' do
+    it 'collects built BaseServerType' do
+      expect { add_server }
+        .to change { config.base_server_types.count }.from(0).to(1)
+    end
+  end
+
   describe '#add_server' do
     subject(:add_server) do
       config.add_server(name: name, uri: uri, headers: headers)
@@ -27,9 +34,18 @@ describe GraphqlConnector::Configuration do
       add_server
     end
 
-    it 'collects built BaseServerType' do
-      expect { add_server }
-        .to change { config.base_server_types.count }.from(0).to(1)
+    it_behaves_like 'Build BaseServerType'
+
+    context 'no headers set' do
+      let(:headers) { nil }
+
+      it_behaves_like 'Build BaseServerType'
+    end
+
+    context 'no connector set' do
+      let(:connector) { nil }
+
+      it_behaves_like 'Build BaseServerType'
     end
   end
 

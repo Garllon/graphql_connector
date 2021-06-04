@@ -3,7 +3,7 @@
 module GraphqlConnector
   # Wrapper class for HTTParty post query
   class HttpClient
-    def initialize(uri, headers, connector = {})
+    def initialize(uri, headers = {}, connector = {})
       @uri = uri
       @headers = headers
       @connector = connector

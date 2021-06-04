@@ -9,7 +9,7 @@ module GraphqlConnector
       @base_server_types = {}
     end
 
-    def add_server(name:, uri:, headers:, connector: {})
+    def add_server(name:, uri:, headers: {}, connector: {})
       @base_server_types[name] =
         BaseServerType.build(name, uri, headers, connector)
     end

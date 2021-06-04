@@ -1,3 +1,9 @@
+## 1.3.1 (2021-06-04)
+
+* add more specs to test headers and connectors
+* make the headers option optinal
+* update the readme to explain the connector functionality better
+
 ## 1.3.0 (2021-06-02)
 
 * add the option to use a connector instead of init header for authorization

@@ -39,7 +39,7 @@ module GraphqlConnector
       return @headers if @connector.empty?
 
       @headers
-        .merge(@connector[:base].send(@connector[:method]))
+        .merge(@connector[:base].public_send(@connector[:method]))
     end
 
     def format_body(response_body)

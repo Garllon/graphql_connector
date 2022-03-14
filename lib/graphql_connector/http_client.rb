@@ -3,37 +3,41 @@
 module GraphqlConnector
   # Wrapper class for HTTParty post query
   class HttpClient
-    def initialize(uri, headers = {}, connector = {})
+    def initialize(uri, headers = {}, connector = {}, httparty_adapter_options = {})
       @uri = uri
       @headers = headers
       @connector = connector
+      @httparty_adapter_options = httparty_adapter_options
     end
 
-    def query(model, conditions, selected_fields)
-      query_string =
-        Formatters::QueryFormat.new(model, conditions, selected_fields).create
-      parsed_body = raw_query(query_string)
+    def query(model, conditions, selected_fields, httparty_adapter_options: {})
+      query_string = Formatters::QueryFormat.new(model, conditions, selected_fields).create
+      parsed_body = raw_query(query_string, httparty_adapter_options: httparty_adapter_options)
       format_body(parsed_body['data'][model.to_s])
     end
 
-    def mutation(model, inputs, selected_fields)
-      query_string =
-        Formatters::MutationFormat.new(model, inputs, selected_fields).create
-      parsed_body = raw_query(query_string)
+    def mutation(model, inputs, selected_fields, httparty_adapter_options: {})
+      query_string = Formatters::MutationFormat.new(model, inputs, selected_fields).create
+      parsed_body = raw_query(query_string, httparty_adapter_options: httparty_adapter_options)
       format_body(parsed_body['data'][model.to_s])
     end
 
-    def raw_query(query_string, variables: {})
+    def raw_query(query_string, variables: {}, httparty_adapter_options: {})
+      adapter_options = combined_adapter_options(httparty_adapter_options)
       response = HTTParty.post(@uri,
                                headers: handle_headers,
-                               body: { query: query_string,
-                                       variables: variables })
+                               body: { query: query_string, variables: variables },
+                               **adapter_options)
       parsed_body = JSON.parse(response.body)
       verify_response!(parsed_body)
       parsed_body
     end
 
     private
+
+    def combined_adapter_options(options)
+      @httparty_adapter_options.merge(options)
+    end
 
     def handle_headers
       return @headers if @connector.empty?

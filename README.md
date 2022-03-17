@@ -30,20 +30,21 @@ Or install it yourself as:
 You need to configure the `graphql_connector` first:
 ``` ruby
 GraphqlConnector.configure do |config|
-  config.add_server(name: 'Foo', uri: 'http://foo.com/api/graphql', headers: {}, connector: {})
+  config.add_server(name: 'Foo', uri: 'http://foo.com/api/graphql', headers: {}, connector: {}, httparty_adapter_options: {})
 end
 ```
 
-The connector is expecting that it contains a `base` connector instance and a
-`method` parameter as string, where it gets the token. WE expect that the
-method is a public method in your connector class. Currently like this:
-```ruby
-{ base: TokenAgent.new, method: 'get_authorization_header' }
-```
+* `name` (**mandatory**): Add a namespace under which the API is reachable. In the above example `'Foo'` means that `GraphqlConnector::Foo` provides API functionality for the configured `add_server`
 
-Your method should return a hash like this:
+* `uri` (**mandatory**): Add uri of grapqhl API server that accepts **POST** requests.
+
+* `connector` (**optionally**): Add a  **Authentication Token class** in the following format:
 ```ruby
-class TokenAgent
+connector: { base: AuthTokenAgent.instance, method: 'get_authorization_header' }
+```
+`base` is an instance of Authentication Token class and `method` represents the function where it gets the token.
+```ruby
+class AuthTokenAgent
    [...]
    def get_authorization_header
       [...]
@@ -51,9 +52,12 @@ class TokenAgent
    end
 end
 ```
+:warning: The function under `method` must be a public one in your connector class.<br />
+:warning: When you set a connector, it will override the setting in the headers for Authorization.
 
-When you set a connector, it will override the setting in the headers for
-Authorization.
+
+* `httparty_adapter_options` (**optionally**): Add any [`connection_adapter`](https://github.com/jnunemaker/httparty/blob/master/lib/httparty/connection_adapter.rb) options that `httparty` supports in a has format e.g. `{ timeout: 4 }`
+
 
 For each graphql server you wish to query use `add_server`.
 
@@ -71,8 +75,22 @@ See the following sub sections for details
 
 You can call your graphql_endpoint via:
 ```ruby
-GraphqlConnector::<name>.raw_query(query_string)
+GraphqlConnector::<name>.raw_query('query { products { id name } }')
+
+GraphqlConnector::<name>.raw_query('query { products($id: [ID!]) { products(id: $id) { id name } } }', variables: { id: 1 })
+
+GraphqlConnector::<name>.raw_query('mutation { createProduct(name: "Coca-Cola") { id name } }')
 ```
+
+Or if you want to **override**/**set** any `httparty_adapter_options` it is also possible to pass them in:
+```ruby
+GraphqlConnector::<name>.raw_query('query { products { id name } }', httparty_adapter_options: { timeout: 3, verify: true })
+
+GraphqlConnector::<name>.raw_query('query { products($id: [ID!]) { products(id: $id) { id name } } }', variables: { id: 1 }, httparty_adapter_options: { timeout: 3, verify: true })
+
+GraphqlConnector::<name>.raw_query('mutation { createProduct(name: "Coca-Cola") { id name } }', httparty_adapter_options: { timeout: 3, verify: true })
+```
+
 
 Note that `<name>` has to be replaced by any of the ones added via `add_server`
 
@@ -83,16 +101,24 @@ See also [here](examples/raw_query_examples.rb) for example usage
 
 You can also use the more comfortable `query`:
 ```ruby
-GraphqlConnector::<name>.query(model, condition, selected_fields)
+GraphqlConnector::<name>.query('products', { id:  [1,2] } , ['id','name'])
 ```
 
-| Variable        | DataType                | Example                                 |
-|----------------|-------------------------|------------------------------------------|
-| model           | String                  | 'product'                               |
-| condition       | Hash(key, value)        | { id: 1 }                               |
-| selected_fields | Array of Strings/Hashes | ['id', 'name', productCategory: ['id']] |
+Or if you want to **override**/**set** any `httparty` adapter_options, it is also possible
+to pass them in:
 
-> Caution:
+```ruby
+GraphqlConnector::<name>.query('products', { id:  [1,2] } , ['id','name'], httparty_adapter_options: { timeout: 3 })
+```
+
+| Variable                 | Required                      | DataType                | Example                                 |
+|--------------------------|-------------------------------|-------------------------|-----------------------------------------|
+| model                    | Yes                           | String                  | 'product'                               |
+| condition                | Yes (but can be empty)        | Hash(key, value)        | { id: 1 }                               |
+| selected_fields          | Yes                           | Array of Strings/Hashes | ['id', 'name', productCategory: ['id']] |
+| httparty_adapter_options | No                            | Hash                    | { timeout: 3 }                          |
+
+:warning:
 > You get an OpenStruct back. Currently only the first level attributes are
 > supported with OpenStruct, associated objects are still a normal array of
 > hashes.
@@ -129,13 +155,24 @@ so that it has re-usable graphql `query` and `mutation` **class methods**.
 * Then you can aliases as many graphql server types via `add_query` and/or `add_raw_query` and/or `add_mutation`:
 
 ```ruby
-add_query <alias>: :<graphql_server_type>, params: [...], returns: [...]
+add_query products_by: :products, params: [:id], returns: [:id, :name]
 
-add_raw_query <alias>: 'query { ... }', params: [...]
+add_raw_query products_raw_by: 'query { products(($id: [ID!]) products { id name } }', params: [:id]
 
-add_mutation <alias>: :<graphql_server_type>, params: [...], returns: [...]
+add_mutation create: :createProduct, params: [:name], returns: [:id, :name]
 ```
 * :grey_exclamation: If not needed omit `params`
+
+Or if you want to **override**/**set** any `httparty` adapter_options, it is also possible
+to pass them in:
+
+```ruby
+add_query products_by: :products, params: [:id], returns: [:id, :name], httparty_adapter_options: { timeout: 3 }
+
+add_raw_query products_raw_by: 'query { products(($id: [ID!]) products { id name } }', params: [:id], httparty_adapter_options: { verify: true }
+
+add_mutation create: :createProduct, params: [:name], returns: [:id, :name], httparty_adapter_options: { timeout: 5, verify: false }
+```
 
 See also [here](examples/departments_service_class_examples.rb) and also here for complete example usage:
 
@@ -153,7 +190,8 @@ class Product
 
   add_query by_id: :products,
             params: :id,
-            returns: [:name, product_category: [:id, :name]]
+            returns: [:name, product_category: [:id, :name]],
+            httparty_adapter_options: { timeout: 3 }
 
   add_query by_names: :products,
             params: :names,
@@ -169,7 +207,8 @@ class Product
 
   add_mutation create: :createProduct,
                params: [:name, :catgetoryId],
-               returns: [:id, :name]
+               returns: [:id, :name],
+               httparty_adapter_options: { verify: false }
 end
 
 Product.all

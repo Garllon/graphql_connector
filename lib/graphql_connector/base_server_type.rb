@@ -5,9 +5,9 @@ module GraphqlConnector
   # Class to wrap http_client calls under a specific namespaced class
   class BaseServerType
     class << self
-      def build(name, uri, headers = {}, connector = {})
+      def build(name, uri, headers = {}, connector = {}, httparty_adapter_options = {})
         verify_new_client_type_for!(name)
-        base_class = class_with(uri, headers, connector)
+        base_class = class_with(uri, headers, connector, httparty_adapter_options)
         base_object = GraphqlConnector.const_set(name, base_class)
         inject_http_client_delegations(base_object)
         create_service_class_module(base_object)
@@ -39,12 +39,13 @@ module GraphqlConnector
         METHOD
       end
 
-      def class_with(uri, headers = {}, connector = {})
+      def class_with(uri, headers = {}, connector = {}, httparty_adapter_options = {})
         Class.new do
-          attr_accessor :uri, :headers, :connector
+          attr_accessor :uri, :headers, :connector, :httparty_adapter_options
           @uri       = uri
           @headers   = headers
           @connector = connector
+          @httparty_adapter_options = httparty_adapter_options
         end
       end
 
@@ -54,8 +55,10 @@ module GraphqlConnector
           def_delegators :http_client, :query, :raw_query, :mutation
 
           def http_client
-            @http_client ||=
-              GraphqlConnector::HttpClient.new(@uri, @headers, @connector)
+            @http_client ||= GraphqlConnector::HttpClient.new(@uri,
+                                                              @headers,
+                                                              @connector,
+                                                              @httparty_adapter_options)
           end
         end
       end

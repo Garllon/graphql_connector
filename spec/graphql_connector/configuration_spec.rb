@@ -18,17 +18,21 @@ describe GraphqlConnector::Configuration do
 
   describe '#add_server' do
     subject(:add_server) do
-      config.add_server(name: name, uri: uri, headers: headers)
+      config.add_server(name: name,
+                        uri: uri,
+                        headers: headers,
+                        httparty_adapter_options: httparty_adapter_options)
     end
     let(:name) { 'Foo' }
     let(:uri) { 'http://foo.com' }
     let(:headers) { {} }
     let(:connector) { {} }
+    let(:httparty_adapter_options) { {} }
 
     it 'forwards params to BaseServerType build' do
       expect(GraphqlConnector::BaseServerType)
         .to receive(:build)
-        .with(name, uri, headers, connector)
+        .with(name, uri, headers, connector, httparty_adapter_options)
         .and_call_original
 
       add_server
@@ -36,14 +40,20 @@ describe GraphqlConnector::Configuration do
 
     it_behaves_like 'Build BaseServerType'
 
-    context 'no headers set' do
+    context 'with no headers set' do
       let(:headers) { nil }
 
       it_behaves_like 'Build BaseServerType'
     end
 
-    context 'no connector set' do
+    context 'with no connector set' do
       let(:connector) { nil }
+
+      it_behaves_like 'Build BaseServerType'
+    end
+
+    context 'with no httparty_adapter_options set' do
+      let(:httparty_adapter_options) { nil }
 
       it_behaves_like 'Build BaseServerType'
     end

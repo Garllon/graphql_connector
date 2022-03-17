@@ -40,15 +40,15 @@ describe 'various service class inclusion cases' do
   end
 
   it 'creates for each add method a class method ' do
-    expect(Car.methods)
-      .to include(:all_cars, :by_id_name, :raw, :raw_by_id_name, :create)
+    expect(Car.methods).to include(:all_cars, :by_id_name, :raw, :raw_by_id_name, :create)
   end
 
   describe '.all_cars' do
     subject(:all_cars) { Car.all_cars }
 
     it 'forwards params to http_client' do
-      expect(car_client).to receive(:query).with(:cars_all, {}, %i[id name])
+      expect(car_client)
+        .to receive(:query).with(:cars_all, {}, %i[id name], httparty_adapter_options: {})
 
       all_cars
     end
@@ -62,7 +62,10 @@ describe 'various service class inclusion cases' do
     it 'forwards params to http_client' do
       expect(car_client)
         .to receive(:query)
-        .with('cars_by_params', { id: '1', name: 'Audi' }, %i[id name])
+        .with('cars_by_params',
+              { id: '1', name: 'Audi' },
+              %i[id name],
+              httparty_adapter_options: {})
 
       by_id_name
     end
@@ -75,7 +78,7 @@ describe 'various service class inclusion cases' do
 
     it 'forwards params to http_client' do
       expect(car_client)
-        .to receive(:raw_query).with('query { cars { id, name } }')
+        .to receive(:raw_query).with('query { cars { id, name } }', httparty_adapter_options: {})
 
       raw
     end
@@ -89,9 +92,9 @@ describe 'various service class inclusion cases' do
     it 'forwards params to http_client' do
       expect(car_client)
         .to receive(:raw_query)
-        .with('query cars($id: !ID, $name: !String) '\
-              '{ cars(id: $id, name: $name) }',
-              variables: { id: '1', name: 'Audi' })
+        .with('query cars($id: !ID, $name: !String) { cars(id: $id, name: $name) }',
+              variables: { id: '1', name: 'Audi' },
+              httparty_adapter_options: {})
 
       raw
     end
@@ -105,7 +108,10 @@ describe 'various service class inclusion cases' do
     it 'forwards params to http_client' do
       expect(car_client)
         .to receive(:mutation)
-        .with('create_car', { name: 'Audi', type: 'Koachn' }, %i[id name])
+        .with('create_car',
+              { name: 'Audi', type: 'Koachn' },
+              %i[id name],
+              httparty_adapter_options: {})
 
       create
     end
@@ -143,7 +149,7 @@ describe 'various service class inclusion cases' do
       it 'forwards params to http_client' do
         expect(truck_client)
           .to receive(:query)
-          .with(:trucks_all, {}, [:truck_id, brand: :name])
+          .with(:trucks_all, {}, [:truck_id, brand: :name], httparty_adapter_options: {})
 
         all_trucks
       end
@@ -181,6 +187,52 @@ describe 'various service class inclusion cases' do
     it 'raises an InvalidParamsError' do
       expect { camper }
         .to raise_error(GraphqlConnector::ServiceClassable::InvalidParamsError)
+    end
+  end
+
+  context 'with httparty_adapter_options set' do
+    let!(:car) do
+      class Car
+        extend GraphqlConnector::ServiceClassable::Queryable
+
+        add_query all_cars: :cars,
+                  params: %i[id],
+                  returns: %i[name],
+                  httparty_adapter_options: { timeout: 3 }
+        add_raw_query all: 'query { cars { id, name } }',
+                      httparty_adapter_options: { timeout: 3, validate: false }
+        add_mutation create: :create_car,
+                     params: %i[name],
+                     returns: %i[id],
+                     httparty_adapter_options: { validate: true }
+      end
+    end
+
+    it 'forwards httparty_adapter_options used in add_query to http_client' do
+      expect(car_client)
+        .to receive(:query)
+        .with(anything, anything, anything, httparty_adapter_options: { timeout: 3 })
+
+      Car.all_cars(id: [1])
+    end
+
+    it 'forwards httparty_adapter_options used in add_raw_query to http_client' do
+      expect(car_client)
+        .to receive(:raw_query)
+        .with(anything, httparty_adapter_options: { timeout: 3, validate: false })
+
+      Car.all
+    end
+
+    it 'forwards httparty_adapter_options used in add_mutation to http_client' do
+      expect(car_client)
+        .to receive(:mutation)
+        .with(anything,
+              anything,
+              anything,
+              httparty_adapter_options: { validate: true })
+
+      Car.create(name: 'Audi')
     end
   end
 end

@@ -6,10 +6,12 @@ describe GraphqlConnector::BaseServerType do
   let(:type) { described_class }
 
   describe '.build' do
-    subject(:build) { type.build(name, uri, headers) }
+    subject(:build) { type.build(name, uri, headers, connector, httparty_adapter_options) }
     let(:name) { 'Foo' }
     let(:uri) { 'http://bar.com/api/graphql' }
     let(:headers) { { 'Authorization' => 'Bearer Test' } }
+    let(:connector) { { base: Class.new, method: 'to_s' } }
+    let(:httparty_adapter_options) { { timeout: 3 } }
 
     after do
       GraphqlConnector.send :remove_const, name
@@ -37,9 +39,7 @@ describe GraphqlConnector::BaseServerType do
 
     it 'creates a service class module' do
       expect { build }
-        .to change { Object.const_defined?('GraphqlConnector::Foo::Query') }
-        .from(false)
-        .to(true)
+        .to change { Object.const_defined?('GraphqlConnector::Foo::Query') }.from(false).to(true)
     end
 
     it 'created service class module has extension injection' do
@@ -59,8 +59,7 @@ describe GraphqlConnector::BaseServerType do
 
       it 'raises an ClientTypeAlreadyExistsError' do
         expect { another_build }
-          .to raise_error(GraphqlConnector::BaseServerTypeAlreadyExistsError,
-                          /name/)
+          .to raise_error(GraphqlConnector::BaseServerTypeAlreadyExistsError, /name/)
       end
     end
   end

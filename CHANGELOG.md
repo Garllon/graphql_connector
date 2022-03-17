@@ -1,3 +1,7 @@
+## 1.4.0 (2022-03-17)
+
+* Add config for `httparty_adapter_options` allowing forwarding options to `httparty`
+
 ## 1.3.1 (2021-06-04)
 
 * add more specs to test headers and connectors

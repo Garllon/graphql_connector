@@ -67,6 +67,7 @@ describe GraphqlConnector::ServiceClassable::Queryable do
       extend GraphqlConnector::ServiceClassable::Queryable
     end
   end
+  let(:httparty_adapter_options) { { timeout: 3 } }
 
   before do
     object
@@ -80,7 +81,8 @@ describe GraphqlConnector::ServiceClassable::Queryable do
     subject(:add_query) do
       object.add_query(by_id: graphql_type,
                        params: params,
-                       returns: return_fields)
+                       returns: return_fields,
+                       httparty_adapter_options: httparty_adapter_options)
     end
     let(:graphql_type) { :products }
     let(:params) { [:id] }
@@ -97,7 +99,8 @@ describe GraphqlConnector::ServiceClassable::Queryable do
 
   describe '.add_raw_query' do
     subject(:add_raw_query) do
-      object.add_raw_query(by_id: raw_graphql_query, params: params)
+      object.add_raw_query(by_id: raw_graphql_query,
+                           params: params, httparty_adapter_options: httparty_adapter_options)
     end
     let(:params) { [:id] }
     let(:raw_graphql_query) { 'query { currency { id } }' }
@@ -119,7 +122,8 @@ describe GraphqlConnector::ServiceClassable::Queryable do
     subject(:add_mutation) do
       object.add_mutation(by_id: graphql_type,
                           params: params,
-                          returns: return_fields)
+                          returns: return_fields,
+                          httparty_adapter_options: httparty_adapter_options)
     end
     let(:graphql_type) { :products }
     let(:params) { [:id] }

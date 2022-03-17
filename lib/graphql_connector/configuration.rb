@@ -9,9 +9,9 @@ module GraphqlConnector
       @base_server_types = {}
     end
 
-    def add_server(name:, uri:, headers: {}, connector: {})
+    def add_server(name:, uri:, headers: {}, connector: {}, httparty_adapter_options: {})
       @base_server_types[name] =
-        BaseServerType.build(name, uri, headers, connector)
+        BaseServerType.build(name, uri, headers, connector, httparty_adapter_options)
     end
 
     def reset!

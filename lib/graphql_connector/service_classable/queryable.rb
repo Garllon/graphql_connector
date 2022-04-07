@@ -10,9 +10,7 @@ module GraphqlConnector
                     end.to_h'
 
       def add_query(params: [], httparty_adapter_options: {}, returns:, **method_to_query)
-        class_method_name = method_to_query.first[0]
-        query_type        = method_to_query.first[1]
-        signature         = method_signature(class_method_name, params)
+        class_method_name, query_type, signature = set_variables(method_to_query, params)
 
         ensure_params_format!(returns, class_method_name, query_type)
 
@@ -25,9 +23,7 @@ module GraphqlConnector
       end
 
       def add_raw_query(params: [], httparty_adapter_options: {}, **method_to_raw_query)
-        class_method_name = method_to_raw_query.first[0]
-        query_string      = method_to_raw_query.first[1]
-        signature         = method_signature(class_method_name, params)
+        class_method_name, query_string, signature = set_variables(method_to_raw_query, params)
 
         ClassMethodValidator.validate_class_method(class_method_name, self)
         ClassMethodValidator.validate_element_class_type(query_string, String)
@@ -39,9 +35,7 @@ module GraphqlConnector
       end
 
       def add_mutation(params: [], httparty_adapter_options: {}, returns:, **method_to_query)
-        class_method_name = method_to_query.first[0]
-        query_type        = method_to_query.first[1]
-        signature         = method_signature(class_method_name, params)
+        class_method_name, query_type, signature = set_variables(method_to_query, params)
 
         ensure_params_format!(returns, class_method_name, query_type)
 
@@ -54,6 +48,21 @@ module GraphqlConnector
       end
 
       private
+
+      def set_variables(method_to_query, params)
+        class_method_name = method_to_query.first[0]
+        query_type        = method_to_query.first[1]
+        signature         = method_signature(class_method_name, params)
+
+        [class_method_name, query_type, signature]
+      end
+
+      def method_signature(name, keywords)
+        return name if keywords.empty?
+
+        keywords = [keywords].flatten
+        "#{name}(#{keywords.map { |keyword| "#{keyword}:" }.join(', ')})"
+      end
 
       def ensure_params_format!(returns, class_method_name, query_type)
         ReturnFieldsValidator.validate(returns)
@@ -90,13 +99,6 @@ module GraphqlConnector
         define_singleton_method class_method_name do
           http_client.mutation(query_type, {}, return_fields.to_a, httparty_adapter_options)
         end
-      end
-
-      def method_signature(name, keywords)
-        return name if keywords.empty?
-
-        keywords = [keywords].flatten
-        "#{name}(#{keywords.map { |keyword| "#{keyword}:" }.join(', ')})"
       end
 
       def create_mutation_method(signature, query_type, return_fields, httparty_adapter_options)

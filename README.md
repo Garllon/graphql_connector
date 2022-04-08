@@ -56,7 +56,7 @@ end
 :warning: When you set a connector, it will override the setting in the headers for Authorization.
 
 
-* `httparty_adapter_options` (**optionally**): Add any [`connection_adapter`](https://github.com/jnunemaker/httparty/blob/master/lib/httparty/connection_adapter.rb) options that `httparty` supports in a has format e.g. `{ timeout: 4 }`
+* `httparty_adapter_options` (**optionally**): Add any [`connection_adapter`](https://github.com/jnunemaker/httparty/blob/master/lib/httparty/connection_adapter.rb) options that `httparty` supports in a hash format e.g. `{ timeout: 4 }`
 
 
 For each graphql server you wish to query use `add_server`.

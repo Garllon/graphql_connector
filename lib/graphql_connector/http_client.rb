@@ -12,14 +12,12 @@ module GraphqlConnector
 
     def query(model, conditions, selected_fields, httparty_adapter_options: {})
       query_string = Formatters::QueryFormat.new(model, conditions, selected_fields).create
-      parsed_body = raw_query(query_string, httparty_adapter_options: httparty_adapter_options)
-      format_body(parsed_body['data'][model.to_s])
+      format_body(query_string, model, httparty_adapter_options)
     end
 
     def mutation(model, inputs, selected_fields, httparty_adapter_options: {})
       query_string = Formatters::MutationFormat.new(model, inputs, selected_fields).create
-      parsed_body = raw_query(query_string, httparty_adapter_options: httparty_adapter_options)
-      format_body(parsed_body['data'][model.to_s])
+      format_body(query_string, model, httparty_adapter_options)
     end
 
     def raw_query(query_string, variables: {}, httparty_adapter_options: {})
@@ -46,7 +44,9 @@ module GraphqlConnector
         .merge(@connector[:base].public_send(@connector[:method]))
     end
 
-    def format_body(response_body)
+    def format_body(query_string, model, httparty_adapter_options)
+      parsed_body   = raw_query(query_string, httparty_adapter_options: httparty_adapter_options)
+      response_body = parsed_body['data'][model.to_s]
       return OpenStruct.new(response_body) unless response_body.is_a? Array
 
       response_body.map { |entry| OpenStruct.new(entry) }

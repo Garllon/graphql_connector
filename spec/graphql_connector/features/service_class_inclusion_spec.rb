@@ -48,7 +48,7 @@ describe 'various service class inclusion cases' do
 
     it 'forwards params to http_client' do
       expect(car_client)
-        .to receive(:query).with(:cars_all, {}, %i[id name], httparty_adapter_options: {})
+        .to receive(:query).with('cars_all', {}, %i[id name], httparty_adapter_options: {})
 
       all_cars
     end
@@ -78,7 +78,8 @@ describe 'various service class inclusion cases' do
 
     it 'forwards params to http_client' do
       expect(car_client)
-        .to receive(:raw_query).with('query { cars { id, name } }', httparty_adapter_options: {})
+        .to receive(:raw_query).with('query { cars { id, name } }',
+                                     variables: {}, httparty_adapter_options: {})
 
       raw
     end
@@ -149,7 +150,7 @@ describe 'various service class inclusion cases' do
       it 'forwards params to http_client' do
         expect(truck_client)
           .to receive(:query)
-          .with(:trucks_all, {}, [:truck_id, brand: :name], httparty_adapter_options: {})
+          .with('trucks_all', {}, [:truck_id, brand: :name], httparty_adapter_options: {})
 
         all_trucks
       end
@@ -219,7 +220,7 @@ describe 'various service class inclusion cases' do
     it 'forwards httparty_adapter_options used in add_raw_query to http_client' do
       expect(car_client)
         .to receive(:raw_query)
-        .with(anything, httparty_adapter_options: { timeout: 3, validate: false })
+        .with(anything, httparty_adapter_options: { timeout: 3, validate: false }, variables: {})
 
       Car.all
     end

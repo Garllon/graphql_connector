@@ -5,63 +5,57 @@ module GraphqlConnector
     # Module that allows to build query methods within the context of
     # service class
     module Queryable
-      CONDITIONS = 'binding.local_variables.map do |var|
-                      [var, binding.local_variable_get(var)]
-                    end.to_h'
+      BINDINGS = 'binding.local_variables.map do |var|
+                    [var, binding.local_variable_get(var)]
+                  end.to_h'
 
       def add_query(params: [], httparty_adapter_options: {}, returns:, **method_to_query)
-        class_method_name, query_type, signature = set_variables(method_to_query, params)
+        class_method_name, query_type = parse_variables(method_to_query)
 
         ensure_params_format!(returns, class_method_name, query_type)
+        ParamsValidator.validate(params) unless params.empty?
 
-        if params.empty?
-          return query_method(signature, query_type, returns, httparty_adapter_options)
-        end
-
-        ParamsValidator.validate(params)
-        create_query_method(signature, query_type, returns, httparty_adapter_options)
+        signature = method_signature(class_method_name, params)
+        signature[:graphql_method_type] = :query
+        create_method(signature, query_type, returns, httparty_adapter_options)
       end
 
       def add_raw_query(params: [], httparty_adapter_options: {}, **method_to_raw_query)
-        class_method_name, query_string, signature = set_variables(method_to_raw_query, params)
+        class_method_name, query_string = parse_variables(method_to_raw_query)
 
         ClassMethodValidator.validate_class_method(class_method_name, self)
         ClassMethodValidator.validate_element_class_type(query_string, String)
+        ParamsValidator.validate(params) unless params.empty?
 
-        return raw_query_method(signature, query_string, httparty_adapter_options) if params.empty?
-
-        ParamsValidator.validate(params)
-        raw_query_keyword_method(signature, query_string, httparty_adapter_options)
+        signature = method_signature(class_method_name, params)
+        raw_query_method(signature, query_string, httparty_adapter_options)
       end
 
       def add_mutation(params: [], httparty_adapter_options: {}, returns:, **method_to_query)
-        class_method_name, query_type, signature = set_variables(method_to_query, params)
+        class_method_name, query_type = parse_variables(method_to_query)
 
         ensure_params_format!(returns, class_method_name, query_type)
+        ParamsValidator.validate(params) unless params.empty?
 
-        if params.empty?
-          return mutation_method(signature, query_type, returns, httparty_adapter_options)
-        end
-
-        ParamsValidator.validate(params)
-        create_mutation_method(signature, query_type, returns, httparty_adapter_options)
+        signature = method_signature(class_method_name, params)
+        signature[:graphql_method_type] = :mutation
+        create_method(signature, query_type, returns, httparty_adapter_options)
       end
 
       private
 
-      def set_variables(method_to_query, params)
+      def parse_variables(method_to_query)
         class_method_name = method_to_query.first[0]
         query_type        = method_to_query.first[1]
-        signature         = method_signature(class_method_name, params)
-
-        [class_method_name, query_type, signature]
+        [class_method_name, query_type]
       end
 
       def method_signature(name, keywords)
-        return name if keywords.empty?
+        return { head: name, bindings: {} } if keywords.empty?
 
         keywords = [keywords].flatten
-        "#{name}(#{keywords.map { |keyword| "#{keyword}:" }.join(', ')})"
+        { head: "#{name}(#{keywords.map { |keyword| "#{keyword}:" }.join(', ')})",
+          bindings: BINDINGS }
       end
 
       def ensure_params_format!(returns, class_method_name, query_type)
@@ -70,60 +64,22 @@ module GraphqlConnector
         ClassMethodValidator.validate_element_class_type(query_type, Symbol)
       end
 
-      def query_method(class_method_name, query_type, return_fields, httparty_adapter_options)
-        define_singleton_method class_method_name do
-          http_client.query(query_type,
-                            {},
-                            return_fields.to_a,
-                            httparty_adapter_options: httparty_adapter_options)
-        end
-      end
-
-      def raw_query_method(class_method_name, query_string, httparty_adapter_options)
-        define_singleton_method class_method_name do
-          http_client.raw_query(query_string, httparty_adapter_options: httparty_adapter_options)
-        end
-      end
-
-      def raw_query_keyword_method(signature, query_string, httparty_adapter_options)
+      def raw_query_method(signature, query_string, httparty_adapter_options)
         instance_eval <<-METHOD, __FILE__, __LINE__ + 1
-          def #{signature}
+          def #{signature[:head]}
             http_client.raw_query("#{query_string}",
-                                  variables: #{CONDITIONS},
+                                  variables: #{signature[:bindings]},
                                   httparty_adapter_options: #{httparty_adapter_options})
           end
         METHOD
       end
 
-      def mutation_method(class_method_name, query_type, return_fields, httparty_adapter_options)
-        define_singleton_method class_method_name do
-          http_client.mutation(query_type, {}, return_fields.to_a, httparty_adapter_options)
-        end
-      end
-
-      def create_mutation_method(signature, query_type, return_fields, httparty_adapter_options)
-        create_keyword_method_for('mutation',
-                                  signature,
-                                  query_type,
-                                  return_fields,
-                                  httparty_adapter_options)
-      end
-
-      def create_query_method(signature, query_type, return_fields, httparty_adapter_options)
-        create_keyword_method_for('query',
-                                  signature,
-                                  query_type,
-                                  return_fields,
-                                  httparty_adapter_options)
-      end
-
-      def create_keyword_method_for(graphql_method_type, signature, query_type, return_fields,
-                                    httparty_adapter_options)
+      def create_method(signature, query_type, return_fields, httparty_adapter_options)
         instance_eval <<-METHOD, __FILE__, __LINE__ + 1
-          def #{signature}
-            http_client.#{graphql_method_type}(
+          def #{signature[:head]}
+            http_client.#{signature[:graphql_method_type]}(
               "#{query_type}",
-              #{CONDITIONS},
+              #{signature[:bindings]},
               #{return_fields.to_a},
               httparty_adapter_options: #{httparty_adapter_options})
           end

@@ -4,6 +4,13 @@ require 'bundler/setup'
 Bundler.setup
 
 require 'simplecov'
+require 'simplecov_json_formatter'
+
+SimpleCov.formatter = SimpleCov::Formatter::JSONFormatter
+SimpleCov.at_exit do
+  puts SimpleCov.result.format!
+end
+
 SimpleCov.start do
   add_filter 'spec'
 end

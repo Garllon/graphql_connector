@@ -24,31 +24,31 @@ jobs:
     name: Rubocop
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 2.7.3
-    - name: Install dependencies
-      run: |
-        gem install bundler
-        bundle install
-    - name: Build and test
-      run: |
-        bundle exec rubocop
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7.3
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install
+      - name: Build and test
+        run: |
+          bundle exec rubocop
   coverage:
-    needs: [ test ]
-    name: coverage
-    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        node-version: '12'
-    - run: npm install -g yarn
-    - run: yarn install
-    - run: yarn build
-    - uses: paambaati/codeclimate-action@v2.2.4
-      env:
-        CC_TEST_REPORTER_ID: secrets.COVERAGE_TEST_REPORTER_ID
-      with:
-        coverageCommand: yarn coverage
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7.3
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install
+      - name: Test & publish code coverage
+        uses: paambaati/codeclimate-action@v3.0.0
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.COVERAGE_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: bundle exec rspec spec
+          debug: true

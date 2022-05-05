@@ -119,11 +119,6 @@ GraphqlConnector::<name>.query('products', { id:  [1,2] } , ['id','name'], httpa
 | selected_fields          | Yes                           | Array of Strings/Hashes | ['id', 'name', productCategory: ['id']] |
 | httparty_adapter_options | No                            | Hash                    | { timeout: 3 }                          |
 
-:warning:
-> You get an OpenStruct back. Currently only the first level attributes are
-> supported with OpenStruct, associated objects are still a normal array of
-> hashes.
-
 See also [here](examples/query_examples.rb) for example usage
 
 #### selected_fields

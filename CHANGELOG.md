@@ -7,6 +7,7 @@ Write here
 ### Breaking changes
 
 * query results are now transformed to OpenStructs recursively, so nested attributes are no longer a hash but another OpenStruct
+* Set minimum Ruby version to `2.4` or higher
 
 ## 1.4.0 (2022-03-17)
 

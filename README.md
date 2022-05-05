@@ -5,6 +5,7 @@
 Version](https://badge.fury.io/rb/graphql_connector.svg)](https://badge.fury.io/rb/graphql_connector)
 [![CI](https://github.com/Garllon/graphql_connector/workflows/CI/badge.svg)](https://github.com/Garllon/graphql_connector/actions?query=workflow%3ACI)
 [![Maintainability](https://api.codeclimate.com/v1/badges/548db3cf0d078b379c84/maintainability)](https://codeclimate.com/github/Garllon/graphql_connector/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/548db3cf0d078b379c84/test_coverage)](https://codeclimate.com/github/Garllon/graphql_connector/test_coverage)
 
 An easy connector to call your `graphql` server. Currently there is no schema
 check in the code, but i will add it.

@@ -12,6 +12,54 @@ shared_examples 'forwards httparty_adapter_options to http client' do |forward_a
   end
 end
 
+shared_examples 'transforms response data' do
+  it { is_expected.to contain_exactly(OpenStruct) }
+
+  it 'responds with correct value for name' do
+    expect(query.first.name).to eq('Audi')
+  end
+
+  context 'when response is a single element' do
+    let(:body) { { data: { cars: { name: 'Audi' } } }.to_json }
+
+    it { is_expected.to be_a(OpenStruct) }
+
+    it 'responds with correct value for name' do
+      expect(query.name).to eq('Audi')
+    end
+  end
+
+  context 'when response has nested attributes' do
+    let(:body) { { data: { cars: { name: 'Audi', tire: { name: 'Michelin' } } } }.to_json }
+
+    it { is_expected.to be_a(OpenStruct) }
+
+    it 'recursively creates OpenStructs for nested attributes' do
+      expect(query.tire.name).to eq('Michelin')
+    end
+  end
+
+  context 'when response is an array' do
+    let(:body) { { data: { cars: [{ name: 'Audi' }] } }.to_json }
+
+    it { is_expected.to be_a(Array) }
+
+    it 'responds with correct value for name' do
+      expect(query[0].name).to eq('Audi')
+    end
+  end
+
+  context 'when response is an array with nested attributes' do
+    let(:body) { { data: { cars: [{ name: 'Audi', tires: [{ name: 'Michelin' }] }] } }.to_json }
+
+    it { is_expected.to be_a(Array) }
+
+    it 'recursively creates OpenStructs for nested attributes' do
+      expect(query[0].tires[0].name).to eq('Michelin')
+    end
+  end
+end
+
 describe GraphqlConnector::HttpClient do
   let(:client) { described_class.new(uri, headers, connector) }
   let(:uri) { 'http://foo.bar/graphql' }
@@ -45,21 +93,7 @@ describe GraphqlConnector::HttpClient do
       query
     end
 
-    it { is_expected.to contain_exactly(OpenStruct) }
-
-    it 'responds with correct value for name' do
-      expect(query.first.name).to eq('Audi')
-    end
-
-    context 'when response with a single element' do
-      let(:body) { { data: { cars: { name: 'Audi' } } }.to_json }
-
-      it { is_expected.to be_a(OpenStruct) }
-
-      it 'responds with correct value for name' do
-        expect(query.name).to eq('Audi')
-      end
-    end
+    include_examples 'transforms response data'
 
     context 'with additional httparty_adapter_options' do
       it_behaves_like 'forwards httparty_adapter_options to http client', { timeout: 1 }
@@ -184,21 +218,7 @@ describe GraphqlConnector::HttpClient do
       query
     end
 
-    it { is_expected.to contain_exactly(OpenStruct) }
-
-    it 'responds with correct value for name' do
-      expect(query.first.name).to eq('Audi')
-    end
-
-    context 'when response with a single element' do
-      let(:body) { { data: { cars: { name: 'Audi' } } }.to_json }
-
-      it { is_expected.to be_a(OpenStruct) }
-
-      it 'responds with correct value for name' do
-        expect(query.name).to eq('Audi')
-      end
-    end
+    include_examples 'transforms response data'
 
     context 'with additional httparty_adapter_options' do
       it_behaves_like 'forwards httparty_adapter_options to http client', { timeout: 1 }

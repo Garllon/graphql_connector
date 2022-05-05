@@ -3,4 +3,5 @@ Lint/DuplicateMethods:
     - lib/graphql_connector.rb
 Metrics/BlockLength:
   Exclude:
+    - "*.gemspec"
     - spec/graphql_connector/**/*.rb

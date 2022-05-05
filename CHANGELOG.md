@@ -4,9 +4,9 @@
 
 Write here
 
-### Braeking Changes
+### Breaking changes
 
-Write here
+* query results are now transformed to OpenStructs recursively, so nested attributes are no longer a hash but another OpenStruct
 
 ## 1.4.0 (2022-03-17)
 

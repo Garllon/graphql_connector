@@ -47,9 +47,19 @@ module GraphqlConnector
     def format_body(query_string, model, httparty_adapter_options)
       parsed_body   = raw_query(query_string, httparty_adapter_options: httparty_adapter_options)
       response_body = parsed_body['data'][model.to_s]
-      return OpenStruct.new(response_body) unless response_body.is_a? Array
+      transform_data(response_body)
+    end
 
-      response_body.map { |entry| OpenStruct.new(entry) }
+    def transform_data(data)
+      case data
+      when Array
+        data.map { |element| transform_data(element) }
+      when Hash
+        data = data.transform_values { |value| transform_data(value) }
+        OpenStruct.new(data)
+      else
+        data
+      end
     end
 
     def verify_response!(parsed_body)

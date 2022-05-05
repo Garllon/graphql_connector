@@ -1,3 +1,13 @@
+## 2.0.0 (TBD)
+
+### Features
+
+Write here
+
+### Braeking Changes
+
+Write here
+
 ## 1.4.0 (2022-03-17)
 
 * Add config for `httparty_adapter_options` allowing forwarding options to `httparty`

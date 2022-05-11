@@ -58,6 +58,22 @@ shared_examples 'transforms response data' do
       expect(query[0].tires[0].name).to eq('Michelin')
     end
   end
+
+  context 'when response has camel case keys' do
+    let(:body) do
+      { data: {
+        cars: { makerName: 'Audi', tires: [{ name: 'Michelin', sizeInInches: 33 }] }
+      } }.to_json
+    end
+
+    it 'translates all camel case keys to snake case' do
+      expect(query).to have_attributes(maker_name: 'Audi')
+    end
+
+    it 'translates all nested camel case keys to snake case' do
+      expect(query.tires[0]).to have_attributes(name: 'Michelin', size_in_inches: 33)
+    end
+  end
 end
 
 describe GraphqlConnector::HttpClient do

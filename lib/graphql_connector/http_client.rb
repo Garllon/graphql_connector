@@ -55,11 +55,26 @@ module GraphqlConnector
       when Array
         data.map { |element| transform_data(element) }
       when Hash
-        data = data.transform_values { |value| transform_data(value) }
-        OpenStruct.new(data)
+        transform_hash(data)
       else
         data
       end
+    end
+
+    def transform_hash(original_hash)
+      transformed_hash = original_hash.each_with_object({}) do |(key, value), hash|
+        hash[underscore(key)] = transform_data(value)
+      end
+      OpenStruct.new(transformed_hash)
+    end
+
+    def underscore(word)
+      word
+        .gsub(/([A-Z]+)(?=[A-Z][a-z])|([a-z\d])(?=[A-Z])/) do
+          (Regexp.last_match(1) || Regexp.last_match(2)) << '_'
+        end
+        .tr('-', '_')
+        .downcase
     end
 
     def verify_response!(parsed_body)

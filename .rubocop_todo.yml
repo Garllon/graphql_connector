@@ -5,3 +5,8 @@ Metrics/BlockLength:
   Exclude:
     - "*.gemspec"
     - spec/graphql_connector/**/*.rb
+Metrics/ParameterLists:
+  Exclude:
+    - lib/graphql_connector/base_server_type.rb
+    - lib/graphql_connector/configuration.rb
+    - lib/graphql_connector/http_client.rb

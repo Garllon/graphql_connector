@@ -3,20 +3,25 @@
 module GraphqlConnector
   # Wrapper class for HTTParty post query
   class HttpClient
-    def initialize(uri, headers = {}, connector = {}, httparty_adapter_options = {})
+    def initialize(uri, headers = {}, connector = {}, httparty_adapter_options = {},
+                   camelize_query_names = true, underscore_response_names = true)
       @uri = uri
       @headers = headers
       @connector = connector
       @httparty_adapter_options = httparty_adapter_options
+      @camelize_query_names = camelize_query_names
+      @underscore_response_names = underscore_response_names
     end
 
     def query(model, conditions, selected_fields, httparty_adapter_options: {})
-      query_string = Formatters::QueryFormat.new(model, conditions, selected_fields).create
+      query_string = Formatters::QueryFormat.new(model, conditions, selected_fields,
+                                                 @camelize_query_names).create
       format_body(query_string, model, httparty_adapter_options)
     end
 
     def mutation(model, inputs, selected_fields, httparty_adapter_options: {})
-      query_string = Formatters::MutationFormat.new(model, inputs, selected_fields).create
+      query_string = Formatters::MutationFormat.new(model, inputs, selected_fields,
+                                                    @camelize_query_names).create
       format_body(query_string, model, httparty_adapter_options)
     end
 
@@ -69,6 +74,8 @@ module GraphqlConnector
     end
 
     def underscore(word)
+      return word unless @underscore_response_names
+
       word
         .gsub(/([A-Z]+)(?=[A-Z][a-z])|([a-z\d])(?=[A-Z])/) do
           (Regexp.last_match(1) || Regexp.last_match(2)) << '_'

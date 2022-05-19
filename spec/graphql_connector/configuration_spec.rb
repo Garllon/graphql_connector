@@ -17,11 +17,15 @@ describe GraphqlConnector::Configuration do
   end
 
   describe '#add_server' do
-    subject(:add_server) do
-      config.add_server(name: name,
-                        uri: uri,
-                        headers: headers,
-                        httparty_adapter_options: httparty_adapter_options)
+    subject(:add_server) { config.add_server(**server_params) }
+
+    let(:server_params) do
+      {
+        name: name,
+        uri: uri,
+        headers: headers,
+        httparty_adapter_options: httparty_adapter_options
+      }
     end
     let(:name) { 'Foo' }
     let(:uri) { 'http://foo.com' }
@@ -32,7 +36,7 @@ describe GraphqlConnector::Configuration do
     it 'forwards params to BaseServerType build' do
       expect(GraphqlConnector::BaseServerType)
         .to receive(:build)
-        .with(name, uri, headers, connector, httparty_adapter_options)
+        .with(name, uri, headers, connector, httparty_adapter_options, true, true)
         .and_call_original
 
       add_server

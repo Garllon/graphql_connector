@@ -4,10 +4,11 @@ module GraphqlConnector
   module Formatters
     # Class that returns in query or mutation string format
     class BaseFormat
-      def initialize(model, conditions, selected_fields)
+      def initialize(model, conditions, selected_fields, camelize_query_names)
         @model = model
         @conditions = conditions
         @selected_fields = selected_fields
+        @camelize_query_names = camelize_query_names
       end
 
       def create
@@ -74,6 +75,8 @@ module GraphqlConnector
       end
 
       def camelize(word)
+        return word unless @camelize_query_names
+
         word.to_s.gsub(/_([a-z\d])/) do
           Regexp.last_match(1).upcase
         end

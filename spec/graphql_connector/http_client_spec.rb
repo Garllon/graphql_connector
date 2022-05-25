@@ -58,13 +58,46 @@ shared_examples 'transforms response data' do
       expect(query[0].tires[0].name).to eq('Michelin')
     end
   end
+
+  context 'when response has camel case keys' do
+    let(:body) do
+      { data: {
+        cars: { makerName: 'Audi', tires: [{ name: 'Michelin', sizeInInches: 33 }] }
+      } }.to_json
+    end
+
+    it 'translates all camel case keys to snake case' do
+      expect(query).to have_attributes(maker_name: 'Audi')
+    end
+
+    it 'translates all nested camel case keys to snake case' do
+      expect(query.tires[0]).to have_attributes(name: 'Michelin', size_in_inches: 33)
+    end
+
+    context 'when underscoring of response names is disabled' do
+      let(:underscore_response_names) { false }
+
+      it 'does not translate camel case keys' do
+        expect(query).to have_attributes(makerName: 'Audi')
+      end
+
+      it 'translates all nested camel case keys to snake case' do
+        expect(query.tires[0]).to have_attributes(name: 'Michelin', sizeInInches: 33)
+      end
+    end
+  end
 end
 
 describe GraphqlConnector::HttpClient do
-  let(:client) { described_class.new(uri, headers, connector) }
+  let(:client) do
+    described_class.new(uri, headers, connector, {},
+                        camelize_query_names, underscore_response_names)
+  end
   let(:uri) { 'http://foo.bar/graphql' }
   let(:headers) { { 'Authorization' => 'Bearer Test' } }
   let(:connector) { {} }
+  let(:camelize_query_names) { true }
+  let(:underscore_response_names) { true }
   let(:body) { { data: { cars: [{ name: 'Audi' }] } }.to_json }
 
   before do
@@ -80,10 +113,22 @@ describe GraphqlConnector::HttpClient do
 
     it 'forwards params to query formatter' do
       expect(GraphqlConnector::Formatters::QueryFormat)
-        .to receive(:new).with(model, conditions, selected_fields)
+        .to receive(:new).with(model, conditions, selected_fields, true)
                          .and_call_original
 
       query
+    end
+
+    context 'with camelization of query names disabled' do
+      let(:camelize_query_names) { false }
+
+      it 'forwards params to query formatter' do
+        expect(GraphqlConnector::Formatters::QueryFormat)
+          .to receive(:new).with(model, conditions, selected_fields, false)
+                           .and_call_original
+
+        query
+      end
     end
 
     it 'resolves query_string via raw_query' do
@@ -205,7 +250,7 @@ describe GraphqlConnector::HttpClient do
 
     it 'forwards params to mutation formatter' do
       expect(GraphqlConnector::Formatters::MutationFormat)
-        .to receive(:new).with(model, inputs, selected_fields)
+        .to receive(:new).with(model, inputs, selected_fields, true)
                          .and_call_original
 
       query

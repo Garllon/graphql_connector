@@ -7,7 +7,7 @@ Write here
 ### Breaking changes
 
 * query results are now transformed to OpenStructs recursively, so nested attributes are no longer a hash but another OpenStruct
-* Set minimum Ruby version to `2.4` or higher
+* snake_case names in non-raw queries are translated to camelCase and camelCase names in responses to snake_case. This way you are able to stay all snake_case in your Ruby code. You can disable this translation with the new server flags `camelize_query_names` and `underscore_response_names`.
 
 ## 1.4.0 (2022-03-17)
 

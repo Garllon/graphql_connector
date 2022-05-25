@@ -4,16 +4,17 @@ module GraphqlConnector
   module Formatters
     # Class that returns in query or mutation string format
     class BaseFormat
-      def initialize(model, conditions, selected_fields)
+      def initialize(model, conditions, selected_fields, camelize_query_names)
         @model = model
         @conditions = conditions
         @selected_fields = selected_fields
+        @camelize_query_names = camelize_query_names
       end
 
       def create
         <<-STRING
         #{query_type} {
-          #{@model}#{arguments} {
+          #{camelize(@model)}#{arguments} {
             #{parse_fields(@selected_fields)}
           }
         }
@@ -24,7 +25,7 @@ module GraphqlConnector
 
       def arguments
         conditions = @conditions.each_with_object([]) do |(key, value), array|
-          array << "#{key}: #{value_as_parameter(value)}"
+          array << "#{camelize(key)}: #{value_as_parameter(value)}"
         end
 
         return '' if conditions.empty?
@@ -38,7 +39,7 @@ module GraphqlConnector
           casted_values = value.map { |v| value_as_parameter(v) }
           "[#{casted_values.join(',')}]"
         when Hash
-          casted_values = value.map { |k, v| "#{k}: #{value_as_parameter(v)}" }
+          casted_values = value.map { |k, v| "#{camelize(k)}: #{value_as_parameter(v)}" }
           "{#{casted_values.join(',')}}"
         else
           scalar_types(value)
@@ -60,7 +61,7 @@ module GraphqlConnector
           when Hash
             handle_association(field)
           else
-            field
+            camelize(field)
           end
         end
 
@@ -69,7 +70,15 @@ module GraphqlConnector
 
       def handle_association(hash)
         hash.map do |key, fields|
-          "#{key} { #{parse_fields(fields)} }"
+          "#{camelize(key)} { #{parse_fields(fields)} }"
+        end
+      end
+
+      def camelize(word)
+        return word unless @camelize_query_names
+
+        word.to_s.gsub(/_([a-z\d])/) do
+          Regexp.last_match(1).upcase
         end
       end
 

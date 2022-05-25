@@ -59,6 +59,9 @@ end
 
 * `httparty_adapter_options` (**optionally**): Add any [`connection_adapter`](https://github.com/jnunemaker/httparty/blob/master/lib/httparty/connection_adapter.rb) options that `httparty` supports in a hash format e.g. `{ timeout: 4 }`
 
+* `camelize_query_names` (**optional, defaults to `true`**): Translate snake_case names in non-raw queries to camelCase, e.g. `product_name` (in your Ruby code) -> `productName` (in the query sent to the server)
+* `underscore_response_names` (**optional, defaults to `true`**): Translate camelCase names in responses to snake_case, e.g. `productName` (in the response from the server) -> `product_name` (as a method name on the response struct)
+
 
 For each graphql server you wish to query use `add_server`.
 

@@ -2,12 +2,26 @@ name: CI
 
 on: [push]
 
-jobs: 
+jobs:
+  test_ruby_2-5:
+    runs-on: ubuntu-latest
+    name: "ruby 2.5"
+    steps:
+      - uses: actions/checkout@v1
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.5
+      - name: Install dependencies
+        run: |
+          gem install bundler -v 2.3.26
+          bundle install
+      - name: Run Test with rspec
+        run: bundle exec rspec spec
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: ['2.5', '2.6', '2.7', '3.0', '3.1']
+        ruby: ['2.6', '2.7', '3.0', '3.1']
     name: "ruby ${{ matrix.ruby }}"
     steps:
       - uses: actions/checkout@v1
